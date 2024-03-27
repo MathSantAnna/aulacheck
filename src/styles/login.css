@@ -1,0 +1,9 @@
+.login-form {
+  width: 600px;
+}
+
+@media (max-width: 600px) {
+  .login-form {
+    width: 80vw;
+  }
+}
