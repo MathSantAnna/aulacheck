@@ -5,7 +5,9 @@ import { AuthProvider } from './hooks/auth';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import './styles/main.css';
+import './styles/main.scss';
+
+import './styles/custom/custom.scss';
 
 function App() {
   const queryClient = new QueryClient();

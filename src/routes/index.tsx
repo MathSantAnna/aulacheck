@@ -1,16 +1,22 @@
 import {
   BrowserRouter,
+  Outlet,
   Route,
   RouteProps,
   Routes as RoutesWrapper,
 } from 'react-router-dom';
 import { Login } from '../pages/Login';
 import { useAuth } from '../hooks/auth';
-import { Home } from '../pages/Home';
+import { Header } from '../components/Header';
+import { Teachers } from '../pages/Teachers';
+import { TeacherDetails } from '../pages/TeacherDetails';
 
 export const paths = {
   login: '/login',
   home: '/',
+
+  teacher: '/professor',
+  teacherDetails: '/professor/:uuidteacher',
 };
 
 export function Routes() {
@@ -23,7 +29,10 @@ export function Routes() {
     },
   ];
 
-  const appRoutes: RouteProps[] = [{ path: paths.home, element: <Home /> }];
+  const appRoutes: RouteProps[] = [
+    { path: paths.home, element: <Teachers /> },
+    { path: paths.teacherDetails, element: <TeacherDetails /> },
+  ];
 
   return (
     <BrowserRouter>
@@ -31,7 +40,12 @@ export function Routes() {
         {isAuthenticated ? (
           <Route
             path='/'
-            element={<div className='content'>HEADER PADRAO</div>}
+            element={
+              <>
+                <Header />
+                <Outlet />
+              </>
+            }
           >
             {appRoutes.map((route) => (
               <Route

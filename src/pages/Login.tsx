@@ -11,7 +11,7 @@ import { SignInProps } from '../types/user';
 
 import { paths } from '../routes';
 
-import '../styles/login.css';
+import '../styles/pages/login.scss';
 
 export function Login() {
   const navigation = useNavigate();
@@ -38,7 +38,7 @@ export function Login() {
       className='w-100 d-flex align-items-center justify-content-center'
       style={{ height: '100vh' }}
     >
-      <Card>
+      <Card className='shadow-sm bg-white'>
         <CardBody>
           <form
             onSubmit={onSubmit}

@@ -14,6 +14,7 @@ import { api } from '../services/api';
 type ContextProps = Partial<UserProps> & {
   isAuthenticated: boolean;
 
+  logOut(): void;
   onLoginSuccess(props: UserProps): void;
 };
 
@@ -31,6 +32,11 @@ export const AuthProvider: React.FC<{ children: JSX.Element }> = ({
     localStorage.setItem('user', JSON.stringify(props));
     api.defaults.headers.common.Authorization = `Bearer ${props.token}`;
   }, []);
+
+  const logOut = () => {
+    setUser(undefined);
+    localStorage.clear();
+  };
 
   useEffect(() => {
     const storagedUser = localStorage.getItem('user');
@@ -58,7 +64,7 @@ export const AuthProvider: React.FC<{ children: JSX.Element }> = ({
 
   return (
     <Context.Provider
-      value={{ ...user, isAuthenticated: !!user, onLoginSuccess }}
+      value={{ ...user, isAuthenticated: !!user, onLoginSuccess, logOut }}
     >
       {children}
     </Context.Provider>
