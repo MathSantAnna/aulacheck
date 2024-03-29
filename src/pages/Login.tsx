@@ -62,7 +62,7 @@ export function Login() {
               rules={{ required: 'Informe uma senha' }}
             />
             <Button
-              className='w-100'
+              className='w-100 mt-2'
               color='primary'
               disabled={loginMutation.isPending}
             >

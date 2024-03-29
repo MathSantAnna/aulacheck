@@ -17,7 +17,7 @@ export function DefaultInput(props: Props) {
   } = useController({ name, control, defaultValue, rules });
 
   return (
-    <div className='d-flex flex-column gap-2'>
+    <div className='d-flex flex-column gap-2 w-100'>
       {label && <label htmlFor={name}>{label}</label>}
       <Input {...rest} {...field} name={name} id={name} />
 
