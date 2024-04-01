@@ -17,11 +17,11 @@ import { DefaultModal } from '../components/DefaultModal';
 import { useEffect, useState } from 'react';
 import { DefaultInput } from '../components/DefaultInput';
 import { useForm } from 'react-hook-form';
-import { getTeachers } from '../services/api';
+import { getTeachers } from '../services/teachers';
 import { ITeachers } from '../types/teacher';
 
 export function Teachers() {
-  const [dataTeachers, setDataTeachers] = useState <ITeachers> ([]);
+  const [dataTeachers, setDataTeachers] = useState<ITeachers>([]);
 
   const [loading, setLoading] = useState(true);
 
@@ -31,13 +31,12 @@ export function Teachers() {
 
   const handleOpen = () => setIsOpen((prev) => !prev);
 
- 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await getTeachers();
         setDataTeachers(response.data);
-        console.log(response.data)
+        console.log(response.data);
         setLoading(false);
       } catch (error) {
         console.error('Erro ao obter dados da API:', error);
@@ -48,14 +47,19 @@ export function Teachers() {
     fetchData();
   }, []);
 
-  
-
   return (
     <>
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+          }}
+        >
+          <CircularProgress />
+        </div>
       ) : (
         <div className='page-content'>
           <Row>
@@ -99,7 +103,9 @@ export function Teachers() {
                       </Link>
                     </TableCell>
                     <TableCell align='right'>{item.email}</TableCell>
-                    <TableCell align='right'>{item && item.courses && item.courses.length}</TableCell>
+                    <TableCell align='right'>
+                      {item && item.courses && item.courses.length}
+                    </TableCell>
                     <TableCell align='right'>
                       {new Date(item.created_at).toLocaleString()}
                     </TableCell>
@@ -114,7 +120,7 @@ export function Teachers() {
               </TableBody>
             </Table>
           </TableContainer>
-  
+
           <DefaultModal
             title='Adicionar professor'
             toggle={handleOpen}
@@ -139,5 +145,5 @@ export function Teachers() {
         </div>
       )}
     </>
-  )
-}  
+  );
+}
