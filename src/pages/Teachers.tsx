@@ -104,7 +104,7 @@ export function Teachers() {
                     </TableCell>
                     <TableCell align='right'>{item.email}</TableCell>
                     <TableCell align='right'>
-                      {item && item.courses && item.courses.length}
+                      {item && item.courses && item.courses?.length}
                     </TableCell>
                     <TableCell align='right'>
                       {new Date(item.created_at).toLocaleString()}
