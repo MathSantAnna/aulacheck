@@ -5,7 +5,7 @@ export const api = axios.create({
 });
 
 export const getTeachers = async () => {
-  const teachers = await axios.get('http://localhost:3000/teachers').then(
+  const teachers = await axios.get('https://aulacheck.onrender.com/teachers').then(
     response => {return response}
   )
   return teachers;
