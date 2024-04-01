@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { MenuOutlined } from '@mui/icons-material';
+import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import Logo from '../../public/vite.svg';
 import { useAuth } from '../hooks/auth';
 
+import { version } from '../../package.json';
+
 import '../styles/components/header.scss';
-import { useState } from 'react';
-import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 
 export function Header() {
   const { nmuser, logOut } = useAuth();
@@ -41,6 +43,7 @@ export function Header() {
           </Button>
         </ModalBody>
       </Modal>
+      <div className='d-none'>{version}</div>
     </header>
   );
 }
