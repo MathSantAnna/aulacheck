@@ -35,6 +35,8 @@ export function Teachers() {
     const fetchData = async () => {
       try {
         const response = await getTeachers();
+
+        console.log('response', response);
         if (response) {
           setDataTeachers(response);
         }
