@@ -35,8 +35,7 @@ export function Teachers() {
     const fetchData = async () => {
       try {
         const response = await getTeachers();
-        setDataTeachers(response.data);
-        console.log(response.data);
+        setDataTeachers(response);
         setLoading(false);
       } catch (error) {
         console.error('Erro ao obter dados da API:', error);
