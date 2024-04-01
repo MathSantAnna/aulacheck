@@ -37,6 +37,7 @@ export function Teachers() {
       try {
         const response = await getTeachers();
         setDataTeachers(response.data);
+        console.log(response.data)
         setLoading(false);
       } catch (error) {
         console.error('Erro ao obter dados da API:', error);
@@ -98,7 +99,7 @@ export function Teachers() {
                       </Link>
                     </TableCell>
                     <TableCell align='right'>{item.email}</TableCell>
-                    <TableCell align='right'>{item.courses.length}</TableCell>
+                    <TableCell align='right'>{item && item.courses && item.courses.length}</TableCell>
                     <TableCell align='right'>
                       {new Date(item.created_at).toLocaleString()}
                     </TableCell>
