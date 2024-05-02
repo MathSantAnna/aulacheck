@@ -39,11 +39,9 @@ export function Teachers() {
       {query.isLoading ? (
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
             height: '100vh',
           }}
+          className='d-flex align-items-center justify-content-center'
         >
           <CircularProgress />
         </div>
