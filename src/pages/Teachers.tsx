@@ -1,4 +1,3 @@
-import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import {
   CircularProgress,
   Paper,
@@ -9,50 +8,35 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
-import { Button, Col, Row } from 'reactstrap';
-//import { teachers } from '../mocks/teachers';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { paths } from '../routes';
-import { DefaultModal } from '../components/DefaultModal';
-import { useEffect, useState } from 'react';
-import { DefaultInput } from '../components/DefaultInput';
 import { useForm } from 'react-hook-form';
+import { Button, Col, Container, Row } from 'reactstrap';
+import { useQuery } from '@tanstack/react-query';
+import { AddOutlined, DeleteOutline } from '@mui/icons-material';
+
+import { DefaultModal } from '../components/DefaultModal';
+import { DefaultInput } from '../components/DefaultInput';
+
 import { getTeachers } from '../services/teachers';
-import { ITeachers } from '../types/teacher';
+
+import { paths } from '../routes';
 
 export function Teachers() {
-  const [dataTeachers, setDataTeachers] = useState<ITeachers>([]);
-
-  const [loading, setLoading] = useState(true);
-
   const [isOpen, setIsOpen] = useState(false);
 
   const { control } = useForm();
 
   const handleOpen = () => setIsOpen((prev) => !prev);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getTeachers();
-
-        console.log('response', response);
-        if (response) {
-          setDataTeachers(response);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Erro ao obter dados da API:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const query = useQuery({
+    queryKey: ['GET_TEACHERS'],
+    queryFn: getTeachers,
+  });
 
   return (
-    <>
-      {loading ? (
+    <Container>
+      {query.isLoading ? (
         <div
           style={{
             display: 'flex',
@@ -93,7 +77,7 @@ export function Teachers() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {dataTeachers.map((item) => (
+                {query.data?.map((item) => (
                   <TableRow key={item.uuidteacher}>
                     <TableCell>
                       <Link
@@ -147,6 +131,6 @@ export function Teachers() {
           </DefaultModal>
         </div>
       )}
-    </>
+    </Container>
   );
 }
