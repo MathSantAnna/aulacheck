@@ -23,4 +23,4 @@ $ npm run dev
 $ yarn dev
 ```
 
-Agora basta acessar o link ``http://localhost:5173` no seu navegador
+Agora basta acessar o link `http://localhost:5173` no seu navegador
