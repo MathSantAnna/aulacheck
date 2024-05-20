@@ -10,22 +10,24 @@ import { useAuth } from '../hooks/auth';
 import { Header } from '../components/Header';
 import { Teachers } from '../pages/Teachers';
 import { TeacherDetails } from '../pages/TeacherDetails';
+import { Courses } from '../pages/Courses';
+import { CourseDetails } from '../pages/CourseDetails';
 
 export const paths = {
   login: '/login',
   home: '/',
 
   teacher: '/professor',
-  teacherDetails: '/professor/:uuidteacher',
+  teacherDetails: '/professor/:uuid',
 
-  lesson: '/materia',
-  lessonDetails: '/materia/:uuidteacher',
+  course: '/materia',
+  courseDetails: '/materia/:uuid',
 
   class: '/turma',
-  classDetails: '/turma/:uuidteacher',
+  classDetails: '/turma/:uuid',
 
   students: '/aluno',
-  studentsDetails: '/aluno/:uuidaluno',
+  studentsDetails: '/aluno/:uuid',
 };
 
 export function Routes() {
@@ -40,7 +42,17 @@ export function Routes() {
 
   const appRoutes: RouteProps[] = [
     { path: paths.home, element: <Teachers /> },
+    { path: paths.teacher, element: <Teachers /> },
     { path: paths.teacherDetails, element: <TeacherDetails /> },
+
+    {
+      path: paths.course,
+      element: <Courses />,
+    },
+    {
+      path: paths.courseDetails,
+      element: <CourseDetails />,
+    },
   ];
 
   return (

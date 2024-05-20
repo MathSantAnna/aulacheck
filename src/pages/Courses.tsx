@@ -18,11 +18,11 @@ import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import { DefaultModal } from '../components/DefaultModal';
 import { DefaultInput } from '../components/DefaultInput';
 
-import { getLessons } from '../services/lessons';
+import { getCourses } from '../services/courses';
 
 import { paths } from '../routes';
 
-export function Lessons() {
+export function Courses() {
   const [isOpen, setIsOpen] = useState(false);
 
   const { control } = useForm();
@@ -31,7 +31,7 @@ export function Lessons() {
 
   const query = useQuery({
     queryKey: ['GET_LESSONS'],
-    queryFn: getLessons,
+    queryFn: getCourses,
   });
 
   return (
@@ -66,38 +66,23 @@ export function Lessons() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Nome</TableCell>
-                  <TableCell align='right'>E-mail</TableCell>
-                  <TableCell align='right'>N° de matérias</TableCell>
-                  <TableCell align='right'>Criado em</TableCell>
-                  <TableCell align='right'>Editado em</TableCell>
+                  <TableCell>Curso</TableCell>
+                  <TableCell align='center'>Sala</TableCell>
                   <TableCell align='right'></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {query.data?.map((item) => (
-                  <TableRow key={item.uuidlesson}>
+                  <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
-                        to={paths.teacherDetails.replace(
-                          ':uuidlesson',
-                          item.uuidlesson
-                        )}
+                        to={paths.courseDetails.replace(':uuid', item.uuid)}
                       >
-                        {item.nmlesson}
+                        {item.nmcourse}
                       </Link>
                     </TableCell>
-                    <TableCell align='right'>{item.email}</TableCell>
+                    <TableCell align='center'>{item.classId}</TableCell>
                     <TableCell align='right'>
-                      {item && item.courses && item.courses?.length}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {new Date(item.created_at).toLocaleString()}
-                    </TableCell>
-                    <TableCell align='right'>
-                      {new Date(item.updated_at).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
                       <DeleteOutline color='error' />
                     </TableCell>
                   </TableRow>
