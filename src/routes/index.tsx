@@ -16,7 +16,7 @@ export const paths = {
   home: '/',
 
   teacher: '/professor',
-  teacherDetails: '/professor/:uuidteacher',
+  teacherDetails: '/professor/:uuid',
 };
 
 export function Routes() {

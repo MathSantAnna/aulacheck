@@ -76,12 +76,12 @@ export function Teachers() {
               </TableHead>
               <TableBody>
                 {query.data?.map((item) => (
-                  <TableRow key={item.uuidteacher}>
+                  <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
                         to={paths.teacherDetails.replace(
-                          ':uuidteacher',
-                          item.uuidteacher
+                          ':uuid',
+                          item.uuid
                         )}
                       >
                         {item.nmteacher}
