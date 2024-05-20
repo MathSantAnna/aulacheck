@@ -17,6 +17,15 @@ export const paths = {
 
   teacher: '/professor',
   teacherDetails: '/professor/:uuidteacher',
+
+  lesson: '/materia',
+  lessonDetails: '/materia/:uuidteacher',
+
+  class: '/turma',
+  classDetails: '/turma/:uuidteacher',
+
+  students: '/aluno',
+  studentsDetails: '/aluno/:uuidaluno',
 };
 
 export function Routes() {
