@@ -11,6 +11,7 @@ import { version } from '../../package.json';
 import '../styles/components/header.scss';
 import { paths } from '../routes';
 
+
 export function Header() {
   const navigate = useNavigate();
 
@@ -37,11 +38,50 @@ export function Header() {
           <strong>Menu</strong>
         </ModalHeader>
         <ModalBody className='d-flex flex-column gap-3'>
-          <Button size='large' color='primary' onClick={() => navigate("/")}>
-            Professores e matérias
+          <Button
+            size='large'
+            color='primary'
+            outline
+            onClick={() => {
+              navigation(paths.teacher);
+              handleOpen();
+            }}
+          >
+            Professores
           </Button>
-          <Button size='large' color='primary' onClick={() => navigate("/aluno")}>
-            Turmas e alunos
+          <Button
+            size='large'
+            color='primary'
+            outline
+            onClick={() => {
+              navigation(paths.course);
+              handleOpen();
+            }}
+          >
+            Matérias
+          </Button>
+          <Button
+            size='large'
+            color='primary'
+            outline
+            onClick={() => {
+              navigation(paths.class);
+              handleOpen();
+            }}
+          >
+            Turmas
+          </Button>
+
+          <Button
+            size='large'
+            color='primary'
+            outline
+            onClick={() => {
+              navigation(paths.students);
+              handleOpen();
+            }}
+          >
+            Alunos
           </Button>
 
           <Button onClick={logOut} size='large' color='danger'>
