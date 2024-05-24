@@ -4,13 +4,16 @@ import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import Logo from '../../public/vite.svg';
 import { useAuth } from '../hooks/auth';
 
+import { useNavigate } from "react-router-dom";
+
 import { version } from '../../package.json';
 
 import '../styles/components/header.scss';
 import { paths } from '../routes';
-import { useNavigate } from 'react-router-dom';
 
 export function Header() {
+  const navigate = useNavigate();
+
   const { nmuser, logOut } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -34,50 +37,11 @@ export function Header() {
           <strong>Menu</strong>
         </ModalHeader>
         <ModalBody className='d-flex flex-column gap-3'>
-          <Button
-            size='large'
-            color='primary'
-            outline
-            onClick={() => {
-              navigation(paths.teacher);
-              handleOpen();
-            }}
-          >
-            Professores
+          <Button size='large' color='primary' onClick={() => navigate("/")}>
+            Professores e matérias
           </Button>
-          <Button
-            size='large'
-            color='primary'
-            outline
-            onClick={() => {
-              navigation(paths.course);
-              handleOpen();
-            }}
-          >
-            Matérias
-          </Button>
-          <Button
-            size='large'
-            color='primary'
-            outline
-            onClick={() => {
-              navigation(paths.class);
-              handleOpen();
-            }}
-          >
-            Turmas
-          </Button>
-
-          <Button
-            size='large'
-            color='primary'
-            outline
-            onClick={() => {
-              navigation(paths.students);
-              handleOpen();
-            }}
-          >
-            Alunos
+          <Button size='large' color='primary' onClick={() => navigate("/aluno")}>
+            Turmas e alunos
           </Button>
 
           <Button onClick={logOut} size='large' color='danger'>

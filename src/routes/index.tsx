@@ -12,6 +12,7 @@ import { Teachers } from '../pages/Teachers';
 import { TeacherDetails } from '../pages/TeacherDetails';
 import { Courses } from '../pages/Courses';
 import { CourseDetails } from '../pages/CourseDetails';
+import { Students } from '../pages/Students';
 
 export const paths = {
   login: '/login',
@@ -28,6 +29,7 @@ export const paths = {
 
   students: '/aluno',
   studentsDetails: '/aluno/:uuid',
+  student: '/aluno',
 };
 
 export function Routes() {
@@ -53,6 +55,7 @@ export function Routes() {
       path: paths.courseDetails,
       element: <CourseDetails />,
     },
+    { path: paths.student, element: <Students />}
   ];
 
   return (

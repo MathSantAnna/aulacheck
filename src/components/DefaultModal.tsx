@@ -15,10 +15,11 @@ type Props = ModalProps & {
   onCancel?(): void;
   confirmLabel?: string;
   cancelLabel?: string;
+  confirmButtonColor?: string;
 };
 
 export function DefaultModal(props: Props) {
-  const { title, onConfirm, onCancel, confirmLabel, cancelLabel, ...rest } =
+  const { title, onConfirm, onCancel, confirmLabel, cancelLabel, confirmButtonColor, ...rest } =
     props;
 
   return (
@@ -34,7 +35,7 @@ export function DefaultModal(props: Props) {
           <Button onClick={onCancel || rest.toggle}>
             {cancelLabel || 'Fechar'}
           </Button>
-          <Button onClick={onConfirm} color='primary'>
+          <Button onClick={onConfirm} color={confirmButtonColor || 'primary'}>
             {confirmLabel || 'Enviar'}
           </Button>
         </ModalFooter>
