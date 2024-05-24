@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/auth';
 import { Header } from '../components/Header';
 import { Teachers } from '../pages/Teachers';
 import { TeacherDetails } from '../pages/TeacherDetails';
+import { Students } from '../pages/Students';
 
 export const paths = {
   login: '/login',
@@ -17,6 +18,7 @@ export const paths = {
 
   teacher: '/professor',
   teacherDetails: '/professor/:uuid',
+  student: '/aluno',
 };
 
 export function Routes() {
@@ -32,6 +34,7 @@ export function Routes() {
   const appRoutes: RouteProps[] = [
     { path: paths.home, element: <Teachers /> },
     { path: paths.teacherDetails, element: <TeacherDetails /> },
+    { path: paths.student, element: <Students />}
   ];
 
   return (

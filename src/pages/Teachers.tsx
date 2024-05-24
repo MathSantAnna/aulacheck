@@ -1,5 +1,9 @@
 import {
+  Checkbox,
   CircularProgress,
+  Collapse,
+  FormControlLabel,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -12,30 +16,107 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Button, Col, Container, Row } from 'reactstrap';
-import { useQuery } from '@tanstack/react-query';
-import { AddOutlined, DeleteOutline } from '@mui/icons-material';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AddOutlined, DeleteOutline, } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
+
 
 import { DefaultModal } from '../components/DefaultModal';
-import { DefaultInput } from '../components/DefaultInput';
+import { Input } from 'reactstrap';
 
-import { getTeachers } from '../services/teachers';
+import { getTeachers, deleteTeacher, createTeacher } from '../services/teachers';
 
 import { paths } from '../routes';
 
 export function Teachers() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
+
+  const [successOpen, setSuccessOpen] = useState(false);
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const [newTeacherName, setNewTeacherName] = useState('');
+
+  const [newTeacherEmail, setNewTeacherEmail] = useState('');
+
   const { control } = useForm();
 
   const handleOpen = () => setIsOpen((prev) => !prev);
+
+  const [teacherOnDelete, setTeacherOnDelete] = useState({});
+
+  const handleOpenDeleteModal = (teacher: any) => {
+    setTeacherOnDelete(teacher)
+    return setIsOpenDeleteModal((prev) => !prev);
+  }
+
+  const handleDelete = (uuidteacher: string) => {
+    mutation.mutate(uuidteacher);
+    setIsOpenDeleteModal(false);
+    setSuccessOpen(true);
+  };
+
+  const handleCreate = async () => {
+    try {
+      const newTeacher = await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: isAdmin });
+      setIsOpen(false);
+      // setSuccessOpen(true);
+    } catch (err) {
+      setIsOpen(false);
+      // setErrorOpen(true);
+    }
+
+  }
+
+  const queryClient = useQueryClient();
+
 
   const query = useQuery({
     queryKey: ['GET_TEACHERS'],
     queryFn: getTeachers,
   });
 
+  const mutation = useMutation({
+    mutationFn: deleteTeacher,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['GET_TEACHERS']);
+    },
+  });
+
+  const mutationCreate = useMutation({
+    mutationFn: createTeacher,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['GET_TEACHERS']);
+    },
+  });
+
+
+
   return (
+
     <Container>
+      <Collapse in={successOpen}>
+        <Alert
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setSuccessOpen(false);
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Professor excluído com sucesso!
+        </Alert>
+      </Collapse>
       {query.isLoading ? (
         <div
           style={{
@@ -98,7 +179,11 @@ export function Teachers() {
                       {new Date(item.updated_at).toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      <DeleteOutline color='error' />
+                      <DeleteOutline
+                        color='error'
+                        onClick={() => handleOpenDeleteModal(item)}
+                        style={{ cursor: 'pointer' }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -110,23 +195,47 @@ export function Teachers() {
             title='Adicionar professor'
             toggle={handleOpen}
             isOpen={isOpen}
-            onConfirm={() => {}}
+            onConfirm={() => handleCreate()}
           >
             <form className='d-flex flex-column gap-4'>
-              <DefaultInput
-                control={control}
-                name='nmteacher'
-                label='Nome do professor'
+              <div className='d-flex flex-column gap-2 w-100'>
+                Nome do professor
+                <Input
+                  name='nmteacher'
+                  label='Nome do professor'
+                  value={newTeacherName}
+                  onChange={(event:any) => setNewTeacherName(event.target.value)}
+                />
+              </div>
+              <div className='d-flex flex-column gap-2 w-100'>
+                E-mail do professor
+                <Input
+                  name='email'
+                  label='E-mail do professor'
+                  value={newTeacherEmail}
+                  onChange={(event:any) => setNewTeacherEmail(event.target.value)}
+                />
+              </div>
+              <FormControlLabel
+                control={<Checkbox />}
+                label="Administrador"
+                onChange={() => setIsAdmin(!isAdmin)}
               />
-              <DefaultInput
-                control={control}
-                name='email'
-                label='E-mail do professor'
-              />
-              <DefaultInput control={control} name='cpf' label='CPF' />
-              <DefaultInput control={control} name='rg' label='RG' />
             </form>
           </DefaultModal>
+
+          <DefaultModal
+            title='Confirmar exclusão'
+            toggle={() => handleOpenDeleteModal(teacherOnDelete)}
+            isOpen={isOpenDeleteModal}
+            onConfirm={() => handleDelete(teacherOnDelete.uuid)}
+            confirmLabel='Deletar'
+            cancelLabel='Cancelar'
+            confirmButtonColor='danger'
+          >
+            <p>Tem certeza de que deseja excluir o professor <strong>{teacherOnDelete.nmteacher}</strong>?</p>
+          </DefaultModal>
+
         </div>
       )}
     </Container>
