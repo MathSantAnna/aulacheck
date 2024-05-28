@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import { Button, Col, Container, Row } from 'reactstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AddOutlined, DeleteOutline, } from '@mui/icons-material';
@@ -42,7 +41,9 @@ export function Teachers() {
 
   const [newTeacherEmail, setNewTeacherEmail] = useState('');
 
-  const { control } = useForm();
+  const [alertSeverity, setAlertSeverity] = useState('warning');
+
+  const [alertMessage, setAlertMessage] = useState('');
 
   const handleOpen = () => setIsOpen((prev) => !prev);
 
@@ -61,7 +62,7 @@ export function Teachers() {
 
   const handleCreate = async () => {
     try {
-      const newTeacher = await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: isAdmin });
+      await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: isAdmin });
       setIsOpen(false);
       // setSuccessOpen(true);
     } catch (err) {
@@ -70,6 +71,9 @@ export function Teachers() {
     }
 
   }
+
+  console.log(isAdmin);
+  
 
   const queryClient = useQueryClient();
 
@@ -83,7 +87,13 @@ export function Teachers() {
     mutationFn: deleteTeacher,
     onSuccess: () => {
       queryClient.invalidateQueries(['GET_TEACHERS']);
+      setAlertMessage('Professor excluído com sucesso.');
+      setAlertSeverity('success');
     },
+    onError: () => {
+      setAlertMessage('Oops! Este professor está vinculado a matérias. Desvincule-o das disciplinas antes de excluí-lo');
+      setAlertSeverity('error')
+    }
   });
 
   const mutationCreate = useMutation({
@@ -100,6 +110,7 @@ export function Teachers() {
     <Container>
       <Collapse in={successOpen}>
         <Alert
+          severity={alertSeverity}
           action={
             <IconButton
               aria-label="close"
@@ -114,7 +125,7 @@ export function Teachers() {
           }
           sx={{ mb: 2 }}
         >
-          Professor excluído com sucesso!
+          {alertMessage}
         </Alert>
       </Collapse>
       {query.isLoading ? (
@@ -204,7 +215,7 @@ export function Teachers() {
                   name='nmteacher'
                   label='Nome do professor'
                   value={newTeacherName}
-                  onChange={(event:any) => setNewTeacherName(event.target.value)}
+                  onChange={(event: any) => setNewTeacherName(event.target.value)}
                 />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
@@ -213,13 +224,17 @@ export function Teachers() {
                   name='email'
                   label='E-mail do professor'
                   value={newTeacherEmail}
-                  onChange={(event:any) => setNewTeacherEmail(event.target.value)}
+                  onChange={(event: any) => setNewTeacherEmail(event.target.value)}
                 />
               </div>
               <FormControlLabel
-                control={<Checkbox />}
+                control={
+                  <Checkbox
+                    checked={isAdmin}
+                    onChange={() => setIsAdmin(!isAdmin)}
+                  />
+                }
                 label="Administrador"
-                onChange={() => setIsAdmin(!isAdmin)}
               />
             </form>
           </DefaultModal>

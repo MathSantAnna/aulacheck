@@ -49,7 +49,7 @@ export function Courses() {
         <div className='page-content'>
           <Row>
             <Col sm={6}>
-              <h4>Lista de Professores</h4>
+              <h4>Lista de Matérias</h4>
             </Col>
             <Col sm={6} className='d-flex justify-content-end'>
               <Button
@@ -92,7 +92,7 @@ export function Courses() {
           </TableContainer>
 
           <DefaultModal
-            title='Adicionar professor'
+            title='Adicionar matéria'
             toggle={handleOpen}
             isOpen={isOpen}
             onConfirm={() => {}}
@@ -101,15 +101,13 @@ export function Courses() {
               <DefaultInput
                 control={control}
                 name='nmteacher'
-                label='Nome do professor'
+                label='Nome da matéria'
               />
               <DefaultInput
                 control={control}
                 name='email'
                 label='E-mail do professor'
               />
-              <DefaultInput control={control} name='cpf' label='CPF' />
-              <DefaultInput control={control} name='rg' label='RG' />
             </form>
           </DefaultModal>
         </div>
