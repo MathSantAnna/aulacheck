@@ -34,6 +34,8 @@ export function Courses() {
     queryFn: getCourses,
   });
 
+  
+
   return (
     <Container>
       {query.isLoading ? (
