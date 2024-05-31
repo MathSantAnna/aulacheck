@@ -176,7 +176,7 @@ export function Students() {
                   <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
-                        to={paths.student.replace(
+                        to={paths.studentsDetails.replace(
                           ':uuid',
                           item.uuid
                         )}
