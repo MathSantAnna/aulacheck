@@ -54,3 +54,11 @@ export async function createStudent(student: NewStudentProps) {
 
   return data;
 }
+
+export async function getStudentsByClass(classId: string) {
+  const { data } = await api.get<StudentsProps[]>(`/student/class/${classId}`);
+
+  console.log('data', data);
+
+  return data;
+}

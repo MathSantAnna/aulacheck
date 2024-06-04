@@ -15,6 +15,7 @@ import { CourseDetails } from '../pages/CourseDetails';
 import { Students } from '../pages/Students';
 import { Classes } from '../pages/Classes';
 import { StudentDetails } from '../pages/StudentDetails';
+import { ClassRoomRollCall } from '../pages/ClassRoomRollCall';
 export const paths = {
   login: '/login',
   home: '/',
@@ -32,6 +33,7 @@ export const paths = {
   studentsDetails: '/aluno/:uuid',
   student: '/aluno',
 
+  classRoomRollCall: 'classroom/roll-call'
 };
 
 export function Routes() {
@@ -57,10 +59,10 @@ export function Routes() {
       path: paths.courseDetails,
       element: <CourseDetails />,
     },
-    { path: paths.student, element: <Students />},
-    { path: paths.studentsDetails, element: <StudentDetails />},
-    { path: paths.class, element: <Classes />},
-   
+    { path: paths.student, element: <Students /> },
+    { path: paths.studentsDetails, element: <StudentDetails /> },
+    { path: paths.class, element: <Classes /> },
+    { path: paths.classRoomRollCall, element: <ClassRoomRollCall /> },
   ];
 
   return (
