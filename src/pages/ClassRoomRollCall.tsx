@@ -7,18 +7,23 @@ import ListItemAvatar from '@mui/material/ListItemAvatar';
 import Checkbox from '@mui/material/Checkbox';
 import Avatar from '@mui/material/Avatar';
 import { Col, Container, Row, Button } from 'reactstrap';
-import { Box, Card, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Alert, Box, Card, Divider, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { CheckCircleOutline, HighlightOff } from '@mui/icons-material';
 import TodayIcon from '@mui/icons-material/Today';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getStudentsByCourse, getTeacherByCourse, submitAttendance } from '../services/courses'; 
-import { getClass } from '../services/class'; 
+import { getStudentsByCourse, getTeacherByCourse, submitAttendance, getRollCallByDate } from '../services/courses';
+import { getClass } from '../services/class';
 import { paths } from '../routes';
 
 export function ClassRoomRollCall() {
     const [checked, setChecked] = React.useState<{ [key: string]: boolean }>({});
-    const [period, setPeriod] = React.useState("1");
+
+    const [periodOneDisabled, setPeriodOneDisabled] = React.useState(false);
+    const [periodTwoDisabled, setPeriodTwoDisabled] = React.useState(false);
+    const [bothPeriodsDisabled, setBothPeriodsDisabled] = React.useState(false);
+
+    const [period, setPeriod] = React.useState("");
     const navigate = useNavigate();
     const location = useLocation();
     const { course } = location.state || {};
@@ -27,6 +32,15 @@ export function ClassRoomRollCall() {
         queryKey: ['GET_COURSES'],
         queryFn: () => getStudentsByCourse(course.uuid || ''),
     });
+
+    const queryRollCallByDate = useQuery({
+        queryKey: ['GET_ROLL_CALL_BY_DATE'],
+        queryFn: () => getRollCallByDate(course.uuid, new Date()),
+    });
+
+    const pastRollCall = queryRollCallByDate.data || {};
+
+    const { firstPeriod, secondPeriod } = pastRollCall;
 
     const students = queryStudents.data || [];
 
@@ -37,15 +51,15 @@ export function ClassRoomRollCall() {
 
     const teacher = teacherQuery.data || [];
 
-    const classQuery = useQuery({ 
-        queryKey: ['GET_CLASS'], 
-        queryFn: () => getClass() 
+    const classQuery = useQuery({
+        queryKey: ['GET_CLASS'],
+        queryFn: () => getClass()
     });
 
     const classes = classQuery.data || [];
 
     function getNameClass(classId: string) {
-        if (!classId) return null; 
+        if (!classId) return null;
         return classes.find(c => c.uuid === classId)?.nmclass;
     }
 
@@ -55,6 +69,37 @@ export function ClassRoomRollCall() {
             [studentId]: !prev[studentId]
         }));
     };
+
+    const handlePeriodAble = (pastCall: any) => {
+        const { firstPeriod, secondPeriod } = pastCall;
+
+        setPeriodOneDisabled(!firstPeriod);
+        setPeriodTwoDisabled(!secondPeriod);
+
+        let newPeriod = period;
+
+        if (period === "1" && firstPeriod) {
+            if (!secondPeriod) {
+                newPeriod = "2";
+            } else {
+                newPeriod = "3";
+                setBothPeriodsDisabled(true);
+            }
+        }
+
+        if (period === "2" && secondPeriod) {
+            if (!firstPeriod) {
+                newPeriod = "1";
+            } else {
+                newPeriod = "3";
+                setBothPeriodsDisabled(true);
+            }
+        }
+
+        if (newPeriod !== period) {
+            setPeriod(newPeriod);
+        }
+    }
 
     function getCurrentFormattedDate() {
         const today = new Date();
@@ -84,8 +129,16 @@ export function ClassRoomRollCall() {
         mutateAttendance.mutate(attendanceData);
     };
 
+    // handlePeriodAble(pastRollCall);
+
     return (
         <Container>
+            {
+                firstPeriod && secondPeriod ?
+                    <Alert style={{ marginTop: "10px" }} severity="warning">A chamada para esta data já foi realizada para todos os períodos</Alert>
+                    :
+                    <></>
+            }
             <div className='page-content'>
                 <Row>
                     <Col sm={6}>
@@ -102,7 +155,7 @@ export function ClassRoomRollCall() {
                             </Typography>
                             <Typography gutterBottom variant="h6" component="div">
                                 <Box display="flex" alignItems="center">
-                                    <TodayIcon/>
+                                    <TodayIcon />
                                     <Box ml={1}>{getCurrentFormattedDate()}</Box>
                                 </Box>
                             </Typography>
@@ -121,14 +174,15 @@ export function ClassRoomRollCall() {
                         </Typography>
                         <ToggleButtonGroup
                             value={period}
+                            disabled={firstPeriod && secondPeriod}
                             exclusive
                             aria-label="periodo"
                             size='small'
                         >
-                            <ToggleButton color='primary' onClick={() => setPeriod("1")} value="1" aria-label="Primeiro periodo">
+                            <ToggleButton disabled={firstPeriod} color='primary' onClick={() => setPeriod("1")} value="1" aria-label="Primeiro periodo">
                                 Período 1
                             </ToggleButton>
-                            <ToggleButton color='primary' onClick={() => setPeriod("2")} value="2" aria-label="Segundo periodo">
+                            <ToggleButton disabled={secondPeriod} color='primary' onClick={() => setPeriod("2")} value="2" aria-label="Segundo periodo">
                                 Período 2
                             </ToggleButton>
                         </ToggleButtonGroup>
@@ -164,7 +218,7 @@ export function ClassRoomRollCall() {
                     );
                 })}
             </List>
-            <Button color='primary' style={{ margin: "10px 0", width: "100%" }} onClick={finalizarChamada}>Finalizar Chamada</Button>
+            <Button disabled={period !== "1" && period !== "2"} color='primary' style={{ margin: "10px 0", width: "100%" }} onClick={finalizarChamada}>Finalizar Chamada</Button>
         </Container>
     );
 }

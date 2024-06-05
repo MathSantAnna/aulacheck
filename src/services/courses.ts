@@ -43,3 +43,15 @@ export async function getStudentsByCourse(courseId: string) {
 
   return data;
 }
+
+export async function getRollCallByDate(courseId: string, date: Date) {
+
+  const payload = {
+    courseId: courseId,
+    date: date
+  }
+
+  const { data } = await api.post('/checkCall', payload);
+
+  return data;
+}
