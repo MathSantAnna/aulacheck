@@ -82,14 +82,14 @@ export const StudentFrequencyTable = (props: any) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell>
-                                        Data
-                                            <Tooltip title='teste' arrow  placement='top-start' style={{marginLeft: '5px', cursor: 'pointer'}}>
-                                                <InfoOutlined sx={{ fontSize: 20 }}/>
-
-                                            </Tooltip>
-                                            
+                                            Data
                                         </TableCell>
-                                        <TableCell>Periodo</TableCell>
+                                        <TableCell>
+                                            Periodo
+                                            <Tooltip title='Registro de presença' arrow placement='top-start' style={{ marginLeft: '5px', marginBottom: '3px', cursor: 'pointer' }}>
+                                                <InfoOutlined sx={{ fontSize: 20 }} color='disabled'/>
+                                            </Tooltip>
+                                        </TableCell>
                                         <TableCell align="center">Presente</TableCell>
                                     </TableRow>
                                 </TableHead>
