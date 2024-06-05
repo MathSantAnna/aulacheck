@@ -33,7 +33,7 @@ export const paths = {
   studentsDetails: '/aluno/:uuid',
   student: '/aluno',
 
-  classRoomRollCall: 'classroom/roll-call'
+  classRoomRollCall: '/classroom/roll-call'
 };
 
 export function Routes() {

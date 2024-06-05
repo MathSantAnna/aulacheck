@@ -10,8 +10,6 @@ type CourseProps = {
 export async function getCourses() {
   const { data } = await api.get<CourseProps[]>('/course');
 
-  console.log('data', data);
-
   return data;
 }
 
@@ -23,9 +21,15 @@ export async function getCourseById(courseId: string) {
 }
 
 export async function createCourse(course: CourseProps) {
-  console.log(course);
-  
+
   await api.post('/course', course);
+}
+
+
+export async function submitAttendance(attendanceData: any) {
+
+  
+  await api.post('/classroom/presence', attendanceData);
 }
 
 export async function getTeacherByCourse(courseId: string) {
@@ -35,7 +39,6 @@ export async function getTeacherByCourse(courseId: string) {
 }
 
 export async function getStudentsByCourse(courseId: string) {
-  console.log('shausha');
   const { data } = await api.get(`/student/course/${courseId}`);
 
   return data;

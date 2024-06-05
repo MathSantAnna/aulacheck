@@ -1,36 +1,41 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getCourseById, getTeacherByCourse } from '../services/courses';
-import { getStudentsByClass } from '../services/students';
+import { getCourseById, getStudentsByCourse, getTeacherByCourse } from '../services/courses';
 import { Link } from 'react-router-dom';
 import { paths } from '../routes';
 import {
   Avatar,
-  Box,
   Card,
-  CardActions,
-  CardContent,
   CardHeader,
   IconButton,
-  ListItemText,
   Paper,
   TableContainer,
-  Typography,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  Tooltip,
-
+  Box,
+  Typography,
+  Collapse
 } from '@mui/material';
 import { MoreVert, HowToReg } from '@mui/icons-material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardControlKey';
 import { blue } from '@mui/material/colors';
 import { Button, Col, Row } from 'reactstrap';
+import { Gauge } from '@mui/x-charts';
+import { useState } from 'react';
+import { StudentFrequencyTable } from '../components/StudentFrequencyTable';
 
 
 export function CourseDetails() {
   const { uuid } = useParams();
+
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+
 
   const courseQuery = useQuery({
     queryKey: ['GET_COURSE'],
@@ -48,13 +53,12 @@ export function CourseDetails() {
 
   const queryStudents = useQuery({
     queryKey: ['GET_COURSES'],
-    queryFn: () => getStudentsByClass(course?.classId || ''),
+    queryFn: () => getStudentsByCourse(course?.uuid || ''),
   });
 
   const students = queryStudents.data || [];
 
-
-
+ 
   return (
     <div className='page-content'>
       <Row>
@@ -63,7 +67,9 @@ export function CourseDetails() {
         </Col>
         <Col sm={6} className='d-flex justify-content-end'>
           <Button
-            //onClick={handleOpen}
+            onClick={() => {
+              navigate(paths.classRoomRollCall, { state: { course: course } });
+            }}
             className='d-flex align-items-center gap-2'
             color='primary'
           >
@@ -93,34 +99,27 @@ export function CourseDetails() {
       </Card>
 
       <TableContainer component={Paper} className='mt-3'>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Nome</TableCell>
-                  <TableCell align='center'>E-mail</TableCell>
-                  <TableCell align='center'>Frequencia</TableCell>                
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {students?.map((item) => (
-                  <TableRow key={item.uuid}>
-                    <TableCell>
-                      <Link
-                        to={paths.studentsDetails.replace(
-                          ':uuid',
-                          item.uuid
-                        )}
-                      >
-                        {item.nmstudent}
-                      </Link>
-                    </TableCell>
-                    <TableCell align='center'>{item.email}</TableCell>              
-                    <TableCell align='center'>{'100%'}</TableCell>              
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell>Nome</TableCell>
+              <TableCell align='center'>E-mail</TableCell>
+              <TableCell align='center'>Faltas</TableCell>
+              <TableCell align='center'>Frequência</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {students?.map((item) => (
+              <StudentFrequencyTable 
+                key={item.uuid}
+                student={item}
+              />
+            ))}
+
+          </TableBody>
+        </Table>
+      </TableContainer>
 
 
 
