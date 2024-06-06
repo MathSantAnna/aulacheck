@@ -19,23 +19,22 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AddOutlined, DeleteOutline, } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import Alert from '@mui/material/Alert';
-
-
 import { DefaultModal } from '../components/DefaultModal';
 import { Input } from 'reactstrap';
-
 import { getTeachers, deleteTeacher, createTeacher } from '../services/teachers';
-
 import { paths } from '../routes';
+import { useAuth } from '../hooks/auth';
 
 export function Teachers() {
+  const {isAdmin} = useAuth();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
 
   const [successOpen, setSuccessOpen] = useState(false);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [newTeacherIsAdmin, setIsAdmin] = useState(false);
 
   const [newTeacherName, setNewTeacherName] = useState('');
 
@@ -62,7 +61,7 @@ export function Teachers() {
 
   const handleCreate = async () => {
     try {
-      await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: isAdmin });
+      await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: newTeacherIsAdmin });
       setIsOpen(false);
       // setSuccessOpen(true);
     } catch (err) {
@@ -72,7 +71,7 @@ export function Teachers() {
 
   }
 
-  console.log(isAdmin);
+  console.log(newTeacherIsAdmin);
   
 
   const queryClient = useQueryClient();
@@ -92,7 +91,7 @@ export function Teachers() {
     },
     onError: () => {
       setAlertMessage('Oops! Este professor está vinculado a matérias. Desvincule-o das disciplinas antes de excluí-lo');
-      setAlertSeverity('error')
+      setAlertSeverity('error');
     }
   });
 
@@ -148,6 +147,8 @@ export function Teachers() {
                 onClick={handleOpen}
                 className='d-flex align-items-center gap-2'
                 color='primary'
+                disabled={!isAdmin}
+                style={{ cursor:  isAdmin ? 'pointer' : 'not-allowed' }}
               >
                 <AddOutlined />
                 Adicionar
@@ -191,9 +192,10 @@ export function Teachers() {
                     </TableCell>
                     <TableCell>
                       <DeleteOutline
-                        color='error'
+                        color={isAdmin ? 'error' : 'disabled'}
                         onClick={() => handleOpenDeleteModal(item)}
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor:  isAdmin ? 'pointer' : 'not-allowed' }}
+                        disabled={!isAdmin}
                       />
                     </TableCell>
                   </TableRow>
@@ -230,8 +232,8 @@ export function Teachers() {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={isAdmin}
-                    onChange={() => setIsAdmin(!isAdmin)}
+                    checked={newTeacherIsAdmin}
+                    onChange={() => setIsAdmin(!newTeacherIsAdmin)}
                   />
                 }
                 label="Administrador"

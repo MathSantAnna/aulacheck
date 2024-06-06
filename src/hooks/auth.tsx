@@ -13,6 +13,8 @@ import { api } from '../services/api';
 
 type ContextProps = Partial<UserProps> & {
   isAuthenticated: boolean;
+  loggedUser: any;
+  isAdmin?: boolean;
 
   logOut(): void;
   onLoginSuccess(props: UserProps): void;
@@ -58,13 +60,15 @@ export const AuthProvider: React.FC<{ children: JSX.Element }> = ({
     setIsLoading(false);
   }, []);
 
+  const isAdmin = user && user.admin
+
   if (isLoading) {
     return <>Carregando...</>;
   }
 
   return (
     <Context.Provider
-      value={{ ...user, isAuthenticated: !!user, onLoginSuccess, logOut }}
+      value={{ ...user, isAdmin: isAdmin, isAuthenticated: !!user, onLoginSuccess, logOut, loggedUser: user }}
     >
       {children}
     </Context.Provider>

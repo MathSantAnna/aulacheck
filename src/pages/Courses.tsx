@@ -9,27 +9,27 @@ import {
   TableRow,
   MenuItem,
   Select,
+  Collapse,
+  IconButton,
+  Alert,
 } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import { Button, Col, Container, Input, Row } from 'reactstrap';
 import { useMutation, useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
 import { AddOutlined, DeleteOutline } from '@mui/icons-material';
-
-
 import { DefaultModal } from '../components/DefaultModal';
-
-
-import { createCourse, getCourses } from '../services/courses';
+import { createCourse, deleteCourse, getCourses } from '../services/courses';
 import { getTeachers } from '../services/teachers';  // Importa a função para buscar professores
 import { getClass } from '../services/class';  // Importa a função para buscar turmas
 import { paths } from '../routes';
+import { useAuth } from '../hooks/auth';
+import CloseIcon from '@mui/icons-material/Close';
+
 
 export function Courses() {
   const [isOpen, setIsOpen] = useState(false);
-
-
+  const { isAdmin, loggedUser } = useAuth();
 
   const [newCourseName, setNewCourseName] = useState('');
   const [teacherId, setTeacherId] = useState('');
@@ -38,6 +38,44 @@ export function Courses() {
   const queryClient = useQueryClient();
 
   const handleOpen = () => setIsOpen((prev) => !prev);
+
+  const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
+
+  const [successOpen, setSuccessOpen] = useState(false);
+
+  const [alertSeverity, setAlertSeverity] = useState('warning');
+
+  const [alertMessage, setAlertMessage] = useState('');
+
+  const [courseOnDelete, setCourseOnDelete] = useState({});
+
+  const handleOpenDeleteModal = (course: any) => {
+    setCourseOnDelete(course);
+    return setIsOpenDeleteModal((prev) => !prev);
+  };
+
+  const handleDelete = (uuidcourse: string) => {
+    mutationDelete.mutate(uuidcourse);
+    setIsOpenDeleteModal(false);
+    setSuccessOpen(true);
+
+  };
+
+  const mutationDelete = useMutation({
+    mutationFn: deleteCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['GET_LESSONS']);
+      setAlertMessage('Matéria deletada com sucesso.');
+      setAlertSeverity('success');
+      setIsOpenDeleteModal(false);
+    },
+    onError: () => {
+      setAlertMessage('Erro ao deletar matéria. Desvincule os alunos antes de deletá-la.');
+      setAlertSeverity('error');
+      setIsOpenDeleteModal(false);
+    },
+  });
+
 
   const mutationCreate = useMutation({
     mutationFn: createCourse,
@@ -60,7 +98,7 @@ export function Courses() {
 
   const query = useQuery({
     queryKey: ['GET_LESSONS'],
-    queryFn: getCourses,
+    queryFn: () => getCourses(loggedUser.uuid, isAdmin || false),
   });
 
   const teacherQuery = useQuery({
@@ -76,6 +114,27 @@ export function Courses() {
 
   return (
     <Container>
+         <Collapse in={successOpen}>
+        <Alert
+          severity={alertSeverity}
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setSuccessOpen(false);
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          {alertMessage}
+        </Alert>
+      </Collapse>
+      
       {query.isLoading || teacherQuery.isLoading ? (
         <div
           style={{
@@ -96,6 +155,7 @@ export function Courses() {
                 onClick={handleOpen}
                 className='d-flex align-items-center gap-2'
                 color='primary'
+                disabled={!isAdmin}
               >
                 <AddOutlined />
                 Adicionar
@@ -125,7 +185,11 @@ export function Courses() {
                     {/* <TableCell align='center'>{item.classId}</TableCell> */}
                     <TableCell align='center'>{ }</TableCell>
                     <TableCell align='right'>
-                      <DeleteOutline color='error' />
+                      <DeleteOutline
+                        color='error'
+                        onClick={() => handleOpenDeleteModal(item)}
+                        style={{ cursor: 'pointer' }}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -182,6 +246,20 @@ export function Courses() {
               </Select>
             </form>
           </DefaultModal>
+          <DefaultModal
+            title='Confirmar exclusão'
+            toggle={() => handleOpenDeleteModal(courseOnDelete)}
+            isOpen={isOpenDeleteModal}
+            onConfirm={() => handleDelete(courseOnDelete.uuid)}
+            confirmLabel='Deletar'
+            cancelLabel='Cancelar'
+            confirmButtonColor='danger'
+          >
+            <p>
+              Deseja realmente deletar a matéria <strong>{courseOnDelete.nmcourse}</strong>?
+            </p>
+          </DefaultModal>
+
         </div>
       )}
     </Container>

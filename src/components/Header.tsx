@@ -15,12 +15,18 @@ import { paths } from '../routes';
 export function Header() {
   const navigate = useNavigate();
 
-  const { nmuser, logOut } = useAuth();
+  const { logOut } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = useNavigate();
   const handleOpen = () => setIsOpen((prev) => !prev);
+
+  const { loggedUser } = useAuth();
+
+  const nmuser = loggedUser?.nmteacher || loggedUser?.nmstudent;
+
+  console.log(loggedUser);
 
   return (
     <header className='header'>

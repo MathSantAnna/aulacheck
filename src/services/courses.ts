@@ -7,10 +7,17 @@ type CourseProps = {
   classId: string;
 };
 
-export async function getCourses() {
-  const { data } = await api.get<CourseProps[]>('/course');
+export async function getCourses(teacherId: string, isAdmin: boolean) {
+  if (isAdmin) {
+    const { data } = await api.get<CourseProps[]>('/course');
 
-  return data;
+    return data;
+  } else {
+    const { data } = await api.get<CourseProps[]>(`/course/teacher/${teacherId}`);
+
+    return data;
+  }
+ 
 }
 
 export async function getCourseById(courseId: string) {
@@ -24,7 +31,6 @@ export async function createCourse(course: CourseProps) {
 
   await api.post('/course', course);
 }
-
 
 export async function submitAttendance(attendanceData: any) {
 
@@ -54,4 +60,9 @@ export async function getRollCallByDate(courseId: string, date: Date) {
   const { data } = await api.post('/checkCall', payload);
 
   return data;
+}
+
+
+export async function deleteCourse(uuid: string) {
+  await api.delete(`/course/${uuid}`);
 }

@@ -8,6 +8,12 @@ type ClassProps = {
     courses: any[]
 };
 
+type CreateClassProps = {
+    nmclass: string
+    graduarion: number
+
+};
+
 
 export async function getClass() {
   const { data } = await api.get<ClassProps>('/class');
@@ -15,4 +21,14 @@ export async function getClass() {
   console.log('data', data);
 
   return data;
+}
+
+
+export async function deleteClass(uuid: string) {
+  await api.delete(`/class/${uuid}`);
+}
+
+export async function createClass(classData: CreateClassProps) {
+
+  await api.post('/class', classData);
 }
