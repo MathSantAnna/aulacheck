@@ -47,7 +47,7 @@ export function Routes() {
   ];
 
   const appRoutes: RouteProps[] = [
-    { path: paths.home, element: <Teachers /> },
+    { path: paths.home, element: <Courses /> },
     { path: paths.teacher, element: <Teachers /> },
     { path: paths.teacherDetails, element: <TeacherDetails /> },
 

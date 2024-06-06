@@ -24,12 +24,14 @@ import { MoreVert, HowToReg, InfoOutlined } from '@mui/icons-material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardControlKey';
 import { blue } from '@mui/material/colors';
-import InfoIcon from '@mui/icons-material/Info';
-import { Button, Col, Row } from 'reactstrap';
+import EditIcon from '@mui/icons-material/Edit';
 import { Gauge } from '@mui/x-charts';
 import { useState } from 'react';
+import { useAuth } from '../hooks/auth';
 
 export const StudentFrequencyTable = (props: any) => {
+
+    const { isStudent } = useAuth();
     const { student } = props;
     const [open, setOpen] = useState(false);
 
@@ -87,21 +89,34 @@ export const StudentFrequencyTable = (props: any) => {
                                         <TableCell>
                                             Periodo
                                             <Tooltip title='Registro de presença' arrow placement='top-start' style={{ marginLeft: '5px', marginBottom: '3px', cursor: 'pointer' }}>
-                                                <InfoOutlined sx={{ fontSize: 20 }} color='disabled'/>
+                                                <InfoOutlined sx={{ fontSize: 20 }} color='disabled' />
                                             </Tooltip>
                                         </TableCell>
                                         <TableCell align="center">Presente</TableCell>
+                                        {!isStudent && <TableCell align="center"></TableCell>}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {student.classroomDetails.history.map((historyRow) => (
-                                        <TableRow key={historyRow.date}>
-                                            <TableCell component="th" scope="row">
-                                                {getCurrentFormattedDate(historyRow.date)}
-                                            </TableCell>
-                                            <TableCell>{historyRow.period === 1 ? 'Primeira chamada' : 'Segunda chamada'}</TableCell>
-                                            <TableCell align="center">{historyRow.presence ? "Presente" : "Ausente"}</TableCell>
-                                        </TableRow>
+                                        <>
+                                            <TableRow key={historyRow.date}>
+                                                <TableCell component="th" scope="row">
+                                                    {getCurrentFormattedDate(historyRow.date)}
+                                                </TableCell>
+                                                <TableCell>{historyRow.period === 1 ? 'Primeira chamada' : 'Segunda chamada'}</TableCell>
+                                                <TableCell align="center">{historyRow.presence ? "Presente" : "Ausente"}</TableCell>
+                                                {!isStudent && <TableCell align="center">
+                                                    <EditIcon
+
+                                                        fontSize='small'
+                                                        style={{ cursor: 'pointer', color: '#6c757d' }}
+                                                        onClick={() => {
+                                                            console.log('Editando presença');
+                                                        }}
+                                                    />
+                                                </TableCell>}
+                                            </TableRow>
+                                        </>
                                     ))}
                                 </TableBody>
                             </Table>

@@ -1,7 +1,9 @@
 import { ResponseProps } from './common';
 
 export type UserProps = {
+  admin?: boolean;
   uuiduser: string;
+  nmstudent?: string;
   nmuser: string;
   email: string;
   created_at: string;

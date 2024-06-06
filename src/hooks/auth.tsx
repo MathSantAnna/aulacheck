@@ -15,6 +15,7 @@ type ContextProps = Partial<UserProps> & {
   isAuthenticated: boolean;
   loggedUser: any;
   isAdmin?: boolean;
+  isStudent?: boolean;
 
   logOut(): void;
   onLoginSuccess(props: UserProps): void;
@@ -61,6 +62,7 @@ export const AuthProvider: React.FC<{ children: JSX.Element }> = ({
   }, []);
 
   const isAdmin = user && user.admin
+  const isStudent = user && !!user.nmstudent
 
   if (isLoading) {
     return <>Carregando...</>;
@@ -68,7 +70,7 @@ export const AuthProvider: React.FC<{ children: JSX.Element }> = ({
 
   return (
     <Context.Provider
-      value={{ ...user, isAdmin: isAdmin, isAuthenticated: !!user, onLoginSuccess, logOut, loggedUser: user }}
+      value={{ ...user, isAdmin: isAdmin, isStudent: isStudent, isAuthenticated: !!user, onLoginSuccess, logOut, loggedUser: user }}
     >
       {children}
     </Context.Provider>

@@ -29,6 +29,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 export function Courses() {
   const [isOpen, setIsOpen] = useState(false);
+  
   const { isAdmin, loggedUser } = useAuth();
 
   const [newCourseName, setNewCourseName] = useState('');
@@ -96,9 +97,13 @@ export function Courses() {
     }
   };
 
+const isStudent = !!loggedUser.nmstudent;
+console.log('isStudent', isStudent);
+
   const query = useQuery({
     queryKey: ['GET_LESSONS'],
-    queryFn: () => getCourses(loggedUser.uuid, isAdmin || false),
+    queryFn: () => getCourses(loggedUser.uuid, isAdmin || false, isStudent),
+
   });
 
   const teacherQuery = useQuery({

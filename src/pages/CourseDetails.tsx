@@ -20,16 +20,16 @@ import {
   Collapse
 } from '@mui/material';
 import { MoreVert, HowToReg } from '@mui/icons-material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardControlKey';
 import { blue } from '@mui/material/colors';
 import { Button, Col, Row } from 'reactstrap';
-import { Gauge } from '@mui/x-charts';
 import { useState } from 'react';
 import { StudentFrequencyTable } from '../components/StudentFrequencyTable';
+import { useAuth } from '../hooks/auth';
 
 
 export function CourseDetails() {
+  const { isStudent } = useAuth();
+
   const { uuid } = useParams();
 
   const navigate = useNavigate();
@@ -66,7 +66,8 @@ export function CourseDetails() {
           <h4>Detalhes da Matéria</h4>
         </Col>
         <Col sm={6} className='d-flex justify-content-end'>
-          <Button
+         {!isStudent && <Button
+            
             onClick={() => {
               navigate(paths.classRoomRollCall, { state: { course: course } });
             }}
@@ -75,7 +76,7 @@ export function CourseDetails() {
           >
             <HowToReg />
             Realizar chamada
-          </Button>
+          </Button>}
         </Col>
       </Row>
 

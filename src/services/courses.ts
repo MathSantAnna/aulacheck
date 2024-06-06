@@ -7,13 +7,15 @@ type CourseProps = {
   classId: string;
 };
 
-export async function getCourses(teacherId: string, isAdmin: boolean) {
+export async function getCourses(teacherId: string, isAdmin: boolean, isStudent: boolean) {
+  const path = isStudent ? '/student' : '/teacher';
+
   if (isAdmin) {
     const { data } = await api.get<CourseProps[]>('/course');
 
     return data;
-  } else {
-    const { data } = await api.get<CourseProps[]>(`/course/teacher/${teacherId}`);
+  } else {   
+    const { data } = await api.get<CourseProps[]>(`/course${path}/${teacherId}`);
 
     return data;
   }
