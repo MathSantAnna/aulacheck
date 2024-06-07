@@ -58,3 +58,12 @@ export async function createTeacher(teacher: NewTeacherProps) {
 
   return data;
 }
+
+
+export async function updateTeacher(uuidteacher: string, teacher: NewTeacherProps) {
+  const { data } = await api.put(`/teachers/${uuidteacher}`, { ...teacher });
+
+  console.log('data', data);
+
+  return data;
+}

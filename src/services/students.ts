@@ -62,3 +62,11 @@ export async function getStudentsByClass(classId: string) {
 
   return data;
 }
+
+export async function updateStudent(uuid: string, student: NewStudentProps) {
+  const { data } = await api.patch(`/student/${uuid}`, { ...student });
+
+  console.log('data', data);
+
+  return data;
+}
