@@ -16,20 +16,19 @@ import {
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Col, Container, Input, Row } from 'reactstrap';
-import { useMutation, useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import { DefaultModal } from '../components/DefaultModal';
 import { createCourse, deleteCourse, getCourses } from '../services/courses';
-import { getTeachers } from '../services/teachers';  // Importa a função para buscar professores
-import { getClass } from '../services/class';  // Importa a função para buscar turmas
+import { getTeachers } from '../services/teachers'; // Importa a função para buscar professores
+import { getClass } from '../services/class'; // Importa a função para buscar turmas
 import { paths } from '../routes';
 import { useAuth } from '../hooks/auth';
 import CloseIcon from '@mui/icons-material/Close';
 
-
 export function Courses() {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const { isAdmin, loggedUser } = useAuth();
 
   const [newCourseName, setNewCourseName] = useState('');
@@ -44,11 +43,13 @@ export function Courses() {
 
   const [successOpen, setSuccessOpen] = useState(false);
 
-  const [alertSeverity, setAlertSeverity] = useState('warning');
+  const [alertSeverity, setAlertSeverity] = useState<
+    'warning' | 'success' | 'error'
+  >('warning');
 
   const [alertMessage, setAlertMessage] = useState('');
 
-  const [courseOnDelete, setCourseOnDelete] = useState({});
+  const [courseOnDelete, setCourseOnDelete] = useState<any>({});
 
   const handleOpenDeleteModal = (course: any) => {
     setCourseOnDelete(course);
@@ -59,29 +60,29 @@ export function Courses() {
     mutationDelete.mutate(uuidcourse);
     setIsOpenDeleteModal(false);
     setSuccessOpen(true);
-
   };
 
   const mutationDelete = useMutation({
     mutationFn: deleteCourse,
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_LESSONS']);
+      queryClient.invalidateQueries({ queryKey: ['GET_LESSONS'] });
       setAlertMessage('Matéria deletada com sucesso.');
       setAlertSeverity('success');
       setIsOpenDeleteModal(false);
     },
     onError: () => {
-      setAlertMessage('Erro ao deletar matéria. Desvincule os alunos antes de deletá-la.');
+      setAlertMessage(
+        'Erro ao deletar matéria. Desvincule os alunos antes de deletá-la.'
+      );
       setAlertSeverity('error');
       setIsOpenDeleteModal(false);
     },
   });
 
-
   const mutationCreate = useMutation({
     mutationFn: createCourse,
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_LESSONS']);
+      queryClient.invalidateQueries({ queryKey: ['GET_LESSONS'] });
       setIsOpen(false);
     },
     onError: () => {
@@ -91,19 +92,22 @@ export function Courses() {
 
   const handleCreateCourse = async () => {
     try {
-      await mutationCreate.mutate({ nmcourse: newCourseName, teacherId: teacherId, classId: selectedClass });
+      await mutationCreate.mutate({
+        nmcourse: newCourseName,
+        teacherId: teacherId,
+        classId: selectedClass,
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
-const isStudent = !!loggedUser.nmstudent;
-console.log('isStudent', isStudent);
+  const isStudent = !!loggedUser.nmstudent;
+  console.log('isStudent', isStudent);
 
   const query = useQuery({
     queryKey: ['GET_LESSONS'],
     queryFn: () => getCourses(loggedUser.uuid, isAdmin || false, isStudent),
-
   });
 
   const teacherQuery = useQuery({
@@ -116,22 +120,21 @@ console.log('isStudent', isStudent);
     queryFn: getClass,
   });
 
-
   return (
     <Container>
-         <Collapse in={successOpen}>
+      <Collapse in={successOpen}>
         <Alert
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -139,7 +142,7 @@ console.log('isStudent', isStudent);
           {alertMessage}
         </Alert>
       </Collapse>
-      
+
       {query.isLoading || teacherQuery.isLoading ? (
         <div
           style={{
@@ -182,13 +185,16 @@ console.log('isStudent', isStudent);
                   <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
-                        to={paths.courseDetails.replace(':uuid', item.uuid)}
+                        to={paths.courseDetails.replace(
+                          ':uuid',
+                          item.uuid || ''
+                        )}
                       >
                         {item.nmcourse}
                       </Link>
                     </TableCell>
                     {/* <TableCell align='center'>{item.classId}</TableCell> */}
-                    <TableCell align='center'>{ }</TableCell>
+                    <TableCell align='center'>{}</TableCell>
                     <TableCell align='right'>
                       <DeleteOutline
                         color='error'
@@ -223,7 +229,7 @@ console.log('isStudent', isStudent);
                 displayEmpty
                 inputProps={{ 'aria-label': 'Without label' }}
               >
-                <MenuItem value="" disabled>
+                <MenuItem value='' disabled>
                   Selecione um professor
                 </MenuItem>
                 {teacherQuery.data?.map((teacher) => (
@@ -234,20 +240,19 @@ console.log('isStudent', isStudent);
               </Select>
               <label>Turma</label>
               <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId='demo-simple-select-label'
+                id='demo-simple-select'
                 value={selectedClass}
                 inputProps={{ 'aria-label': 'Without label' }}
                 displayEmpty
                 onChange={(event) => setSelectedClass(event.target.value)}
               >
-                <MenuItem value="" disabled>
+                <MenuItem value='' disabled>
                   Selecione uma turma
                 </MenuItem>
                 {queryClass.data?.map((item) => (
                   <MenuItem value={item.uuid}>{item.nmclass}</MenuItem>
                 ))}
-
               </Select>
             </form>
           </DefaultModal>
@@ -261,10 +266,10 @@ console.log('isStudent', isStudent);
             confirmButtonColor='danger'
           >
             <p>
-              Deseja realmente deletar a matéria <strong>{courseOnDelete.nmcourse}</strong>?
+              Deseja realmente deletar a matéria{' '}
+              <strong>{courseOnDelete.nmcourse}</strong>?
             </p>
           </DefaultModal>
-
         </div>
       )}
     </Container>

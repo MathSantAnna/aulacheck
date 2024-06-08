@@ -1,27 +1,23 @@
 import { api } from './api';
 
 type TeachersProps = {
-  uuidteacher: string;
+  uuid: string;
   nmteacher: string;
   email: string;
+  password: string;
   created_at: string;
+  admin: boolean;
   updated_at: string;
-  courses: {
-    nmcourse: string;
-    uuidcourse: string;
-  }[];
 };
 
 type TeacherProps = {
-  uuidteacher: string;
+  uuid: string;
   nmteacher: string;
   email: string;
+  password: string;
   created_at: string;
+  admin: boolean;
   updated_at: string;
-  courses: {
-    nmcourse: string;
-    uuidcourse: string;
-  };
 };
 
 type NewTeacherProps = {
@@ -59,8 +55,10 @@ export async function createTeacher(teacher: NewTeacherProps) {
   return data;
 }
 
-
-export async function updateTeacher(uuidteacher: string, teacher: NewTeacherProps) {
+export async function updateTeacher(
+  uuidteacher: string,
+  teacher: NewTeacherProps
+) {
   const { data } = await api.put(`/teachers/${uuidteacher}`, { ...teacher });
 
   console.log('data', data);

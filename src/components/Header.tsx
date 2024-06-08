@@ -4,17 +4,14 @@ import { Button, Modal, ModalBody, ModalHeader } from 'reactstrap';
 import Logo from '../../public/vite.svg';
 import { useAuth } from '../hooks/auth';
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 import { version } from '../../package.json';
 
 import '../styles/components/header.scss';
 import { paths } from '../routes';
 
-
 export function Header() {
-  const navigate = useNavigate();
-
   const { logOut } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
