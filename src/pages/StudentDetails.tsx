@@ -10,6 +10,8 @@ import {
   Collapse,
   IconButton,
   ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   TableContainer,
   Typography
@@ -30,7 +32,6 @@ const formatStudentCourses = (student) => {
     return 'Nenhum curso encontrado';
   }
   const courseNames = student.courses.map(course => course.nmcourse);
-
   return courseNames.join(', ');
 }
 
@@ -38,12 +39,18 @@ export function StudentDetails() {
   const { uuid } = useParams();
   
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+  const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
   const [currentName, setCurrentName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const { control, handleSubmit, reset } = useForm();
   const queryClient = useQueryClient();
   const [successOpen, setSuccessOpen] = useState(false);
-  
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
+  const toggleEditPasswordModal = () => setIsEditPasswordModalOpen((prev) => !prev);
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   const id = uuid || '';
 
@@ -54,24 +61,39 @@ export function StudentDetails() {
   });
 
   const mutation = useMutation({
-    mutationFn: (newName: string) => updateStudent(id, { nmstudent: newName }),
+    mutationFn: (data) => updateStudent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['GET_STUDENT', id]);
-      toggleEditNameModal();
-      setSuccessOpen(true);  
+      setSuccessOpen(true);
     },
   });
 
   const handleEditNameClick = () => {
     if (student) {
       setCurrentName(student.nmstudent);
-      reset({ nmstudent: student.nmstudent }); 
+      reset({ nmstudent: student.nmstudent });
       toggleEditNameModal();
     }
+    handleMenuClose();
   };
 
-  const handleEditNameConfirm = (data: any) => {
-    mutation.mutate(data.nmstudent);
+  const handleEditPasswordClick = () => {
+    if (student) {
+      setCurrentPassword(student.password);
+      reset({ password: '' }); 
+      toggleEditPasswordModal();
+    }
+    handleMenuClose();
+  };
+
+  const handleEditNameConfirm = (data) => {
+    mutation.mutate({ nmstudent: data.nmstudent });
+    toggleEditNameModal();
+  };
+
+  const handleEditPasswordConfirm = (data) => {
+    mutation.mutate({ password: data.password });
+    toggleEditPasswordModal();
   };
 
   return (
@@ -92,7 +114,7 @@ export function StudentDetails() {
           }
           sx={{ mb: 2 }}
         >
-          Nome do aluno atualizado com sucesso!
+          Operação realizada com sucesso!
         </Alert>
       </Collapse>
     
@@ -114,9 +136,19 @@ export function StudentDetails() {
               title={student && student.nmstudent}
               subheader={student && student.email}
               action={
-                <IconButton aria-label="settings" onClick={handleEditNameClick}>
-                  <MoreVert />
-                </IconButton>
+                <>
+                  <IconButton aria-label="settings" onClick={handleMenuOpen}>
+                    <MoreVert />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>
+                    <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>
+                  </Menu>
+                </>
               }
             />
             <CardContent>
@@ -150,6 +182,22 @@ export function StudentDetails() {
                 name='nmstudent'
                 label='Nome do aluno'
                 defaultValue={currentName}
+              />
+            </form>
+          </DefaultModal>
+          <DefaultModal
+            title={`Editar senha do aluno`}
+            toggle={toggleEditPasswordModal}
+            isOpen={isEditPasswordModalOpen}
+            onConfirm={handleSubmit(handleEditPasswordConfirm)}
+          >
+            <form className='d-flex flex-column gap-4'>
+              <DefaultInput
+                control={control}
+                name='password'
+                label='Nova senha'
+                type='password'
+                defaultValue={currentPassword}
               />
             </form>
           </DefaultModal>

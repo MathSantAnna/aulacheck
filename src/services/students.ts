@@ -23,6 +23,7 @@ type NewStudentProps = {
   email: string;
   parentemail: string;
   classId: string;
+  password: string;
 };
 
 
