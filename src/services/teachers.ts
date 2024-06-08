@@ -24,6 +24,7 @@ type NewTeacherProps = {
   nmteacher: string;
   email: string;
   admin: boolean;
+  password: string;
 };
 
 export async function getTeachers() {

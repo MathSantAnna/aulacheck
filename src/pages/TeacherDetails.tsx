@@ -10,6 +10,8 @@ import {
   Collapse,
   IconButton,
   ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   TableContainer,
   Typography
@@ -25,7 +27,7 @@ import { red } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-const formatTeacherCourses = (teacher: any) => {
+const formatTeacherCourses = (teacher) => {
   return '';
 }
 
@@ -33,12 +35,18 @@ export function TeacherDetails() {
   const { uuid } = useParams();
   
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
+  const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
   const [currentName, setCurrentName] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const { control, handleSubmit, reset } = useForm();
   const queryClient = useQueryClient();
   const [successOpen, setSuccessOpen] = useState(false);
-  
+  const [anchorEl, setAnchorEl] = useState(null);
+
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
+  const toggleEditPasswordModal = () => setIsEditPasswordModalOpen((prev) => !prev);
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   const id = uuid || '';
 
@@ -49,109 +57,148 @@ export function TeacherDetails() {
   });
 
   const mutation = useMutation({
-    mutationFn: (newName: string) => updateTeacher(id, { nmteacher: newName }),
+    mutationFn: (data) => updateTeacher(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['GET_TEACHER', id]);
-      toggleEditNameModal();
-      setSuccessOpen(true);  
+      setSuccessOpen(true);
     },
   });
 
   const handleEditNameClick = () => {
     if (teacher) {
       setCurrentName(teacher.nmteacher);
-      reset({ nmteacher: teacher.nmteacher }); 
+      reset({ nmteacher: teacher.nmteacher });
       toggleEditNameModal();
     }
+    handleMenuClose();
   };
 
-  const handleEditNameConfirm = (data: any) => {
-    mutation.mutate(data.nmteacher);
+  const handleEditPasswordClick = () => {
+    if (teacher) {
+      setCurrentPassword(teacher.password);
+      reset({ password: '' }); 
+      toggleEditPasswordModal();
+    }
+    handleMenuClose();
+  };
+
+  const handleEditNameConfirm = (data) => {
+    mutation.mutate({ nmteacher: data.nmteacher });
+    toggleEditNameModal();
+  };
+
+  const handleEditPasswordConfirm = (data) => {
+    mutation.mutate({ password: data.password });
+    toggleEditPasswordModal();
   };
 
   return (
-   <Container>
-
-     <Collapse in={successOpen}>
-       <Alert
-         action={
-           <IconButton
-             aria-label="close"
-             color="inherit"
-             size="small"
-             onClick={() => {
-               setSuccessOpen(false);
-             }}
-           >
-             <CloseIcon fontSize="inherit" />
-           </IconButton>
-         }
-         sx={{ mb: 2 }}
-       >
-         Nome do professor atualizado com sucesso!
-       </Alert>
-     </Collapse>
-   
-     {!isLoading && teacher && (
-       <div className='page-content'>
-         <Row>
-           <Col sm={6}>
-             <h4>Detalhes do Professor</h4>
-           </Col>
-         </Row>
-
-         <Card>
-           <CardHeader
-             avatar={
-               <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-                 {teacher && teacher.nmteacher.charAt(0).toUpperCase()}
-               </Avatar>
-             }
-             title={teacher && teacher.nmteacher}
-             subheader={teacher && teacher.email}
-             action={
-               <IconButton aria-label="settings" onClick={handleEditNameClick}>
-                 <MoreVert />
-               </IconButton>
-             }
-           />
-           <CardContent>
-             <ListItemText
-               primary="Matérias"
-               primaryTypographyProps={{
-                 fontSize: 15,
-                 fontWeight: 'medium',
-                 lineHeight: '20px',
-                 mb: '2px',
-               }}
-               secondary={formatTeacherCourses(teacher)}
-               secondaryTypographyProps={{
-                 noWrap: true,
-                 fontSize: 12,
-                 lineHeight: '16px',
-               }}
-               sx={{ my: 0 }}
-             />
-           </CardContent>
-         </Card>
-         <DefaultModal
-           title={`Editar nome do professor`}
-           toggle={toggleEditNameModal}
-           isOpen={isEditNameModalOpen}
-           onConfirm={handleSubmit(handleEditNameConfirm)}
-         >
-           <form className='d-flex flex-column gap-4'>
-             <DefaultInput
-               control={control}
-               name='nmteacher'
-               label='Nome do professor'
-               defaultValue={currentName}
-             />
-           </form>
-         </DefaultModal>
-       </div>
-     )}
-   </Container>
+    <Container>
+      <Collapse in={successOpen}>
+        <Alert
+          action={
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              size="small"
+              onClick={() => {
+                setSuccessOpen(false);
+              }}
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+          }
+          sx={{ mb: 2 }}
+        >
+          Operação realizada com sucesso!
+        </Alert>
+      </Collapse>
     
+      {!isLoading && teacher && (
+        <div className='page-content'>
+          <Row>
+            <Col sm={6}>
+              <h4>Detalhes do Professor</h4>
+            </Col>
+          </Row>
+
+          <Card>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                  {teacher && teacher.nmteacher.charAt(0).toUpperCase()}
+                </Avatar>
+              }
+              title={teacher && teacher.nmteacher}
+              subheader={teacher && teacher.email}
+              action={
+                <>
+                  <IconButton aria-label="settings" onClick={handleMenuOpen}>
+                    <MoreVert />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>
+                    <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>
+                  </Menu>
+                </>
+              }
+            />
+            <CardContent>
+              <ListItemText
+                primary="Matérias"
+                primaryTypographyProps={{
+                  fontSize: 15,
+                  fontWeight: 'medium',
+                  lineHeight: '20px',
+                  mb: '2px',
+                }}
+                secondary={formatTeacherCourses(teacher)}
+                secondaryTypographyProps={{
+                  noWrap: true,
+                  fontSize: 12,
+                  lineHeight: '16px',
+                }}
+                sx={{ my: 0 }}
+              />
+            </CardContent>
+          </Card>
+          <DefaultModal
+            title={`Editar nome do professor`}
+            toggle={toggleEditNameModal}
+            isOpen={isEditNameModalOpen}
+            onConfirm={handleSubmit(handleEditNameConfirm)}
+          >
+            <form className='d-flex flex-column gap-4'>
+              <DefaultInput
+                control={control}
+                name='nmteacher'
+                label='Nome do professor'
+                defaultValue={currentName}
+              />
+            </form>
+          </DefaultModal>
+          <DefaultModal
+            title={`Editar senha do professor`}
+            toggle={toggleEditPasswordModal}
+            isOpen={isEditPasswordModalOpen}
+            onConfirm={handleSubmit(handleEditPasswordConfirm)}
+          >
+            <form className='d-flex flex-column gap-4'>
+              <DefaultInput
+                control={control}
+                name='password'
+                label='Nova senha'
+                type='password'
+                defaultValue={currentPassword}
+              />
+            </form>
+          </DefaultModal>
+        </div>
+      )}
+    </Container>
   );
 }
