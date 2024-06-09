@@ -112,7 +112,7 @@ export function ClassRoomRollCall() {
     const mutateAttendance = useMutation({
         mutationFn: (attendanceData: any) => submitAttendance(attendanceData),
         onSuccess: () => {
-            navigate(paths.courseDetails.replace(':uuid', course.uuid))
+            navigate(paths.courseDetails.replace(':uuid', course.uuid), { state: { newRollCall: true } })
         }
     });
 

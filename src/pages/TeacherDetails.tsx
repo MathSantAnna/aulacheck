@@ -26,14 +26,16 @@ import { useForm } from 'react-hook-form';
 import { red } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../hooks/auth';
 
 const formatTeacherCourses = (teacher) => {
   return '';
 }
 
 export function TeacherDetails() {
+
+  const { isAdmin, loggedUser } = useAuth();
   const { uuid } = useParams();
-  
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
   const [currentName, setCurrentName] = useState('');
@@ -49,13 +51,16 @@ export function TeacherDetails() {
   const handleMenuClose = () => setAnchorEl(null);
 
   const id = uuid || '';
-
+  
   const { data: teacher, isLoading } = useQuery({
     queryKey: ['GET_TEACHER', id],
     queryFn: () => getTeacher(id),
     enabled: !!id,
   });
 
+  const ableToEdit = loggedUser.uuid === teacher?.uuid;
+
+ 
   const mutation = useMutation({
     mutationFn: (data) => updateTeacher(id, data),
     onSuccess: () => {
@@ -141,8 +146,8 @@ export function TeacherDetails() {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                   >
-                    <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>
-                    <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>
+                    {(ableToEdit || isAdmin) && <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>}
+                   {ableToEdit && <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>}
                   </Menu>
                 </>
               }

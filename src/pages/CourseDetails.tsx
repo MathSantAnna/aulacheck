@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCourseById, getStudentsByCourse, getTeacherByCourse } from '../services/courses';
 import { Link } from 'react-router-dom';
@@ -25,9 +25,14 @@ import { Button, Col, Row } from 'reactstrap';
 import { useState } from 'react';
 import { StudentFrequencyTable } from '../components/StudentFrequencyTable';
 import { useAuth } from '../hooks/auth';
+import LowFrequencyStudentsModal from '../components/LowFrequencyStudentsModal';
 
 
 export function CourseDetails() {
+  const location = useLocation();
+
+  const { newRollCall } = location.state || false;
+
   const { isStudent } = useAuth();
 
   const { uuid } = useParams();
@@ -35,6 +40,17 @@ export function CourseDetails() {
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
+
+  const checkLowFrequencyStudent = (students: any[]) => {
+    const lowFrequencyStudents: any[] = [];
+    students.forEach(student => {
+      if (student.classroomDetails.frequence < 80) {
+        lowFrequencyStudents.push(student);
+      }
+    });
+
+    return lowFrequencyStudents;
+  }
 
 
   const courseQuery = useQuery({
@@ -44,6 +60,8 @@ export function CourseDetails() {
 
   const course = courseQuery.data;
 
+  console.log(course);
+
   const teacherQuery = useQuery({
     queryKey: ['GET_TEACHER'],
     queryFn: () => getTeacherByCourse(uuid || ''),
@@ -52,22 +70,24 @@ export function CourseDetails() {
   const teacher = teacherQuery.data;
 
   const queryStudents = useQuery({
-    queryKey: ['GET_COURSES'],
+    queryKey: [`GET_STUDENTS_${course?.uuid}`],
     queryFn: () => getStudentsByCourse(course?.uuid || ''),
   });
 
   const students = queryStudents.data || [];
+  const lowFrequencyStudents = checkLowFrequencyStudent(students);
 
- 
+
   return (
     <div className='page-content'>
+      {(lowFrequencyStudents.length > 0 && newRollCall) && <LowFrequencyStudentsModal students={checkLowFrequencyStudent(students)} />}
       <Row>
         <Col sm={6}>
           <h4>Detalhes da Matéria</h4>
         </Col>
         <Col sm={6} className='d-flex justify-content-end'>
-         {!isStudent && <Button
-            
+          {!isStudent && <Button
+
             onClick={() => {
               navigate(paths.classRoomRollCall, { state: { course: course } });
             }}
@@ -91,11 +111,11 @@ export function CourseDetails() {
           }
           title={course && course.nmcourse}
           subheader={teacher && teacher.nmteacher}
-          action={
+        /*  action={
             <IconButton aria-label="settings">
               <MoreVert />
             </IconButton>
-          }
+          }*/
         />
       </Card>
 
@@ -112,7 +132,7 @@ export function CourseDetails() {
           </TableHead>
           <TableBody>
             {students?.map((item) => (
-              <StudentFrequencyTable 
+              <StudentFrequencyTable
                 key={item.uuid}
                 student={item}
               />
@@ -121,9 +141,6 @@ export function CourseDetails() {
           </TableBody>
         </Table>
       </TableContainer>
-
-
-
     </div>
   );
 }
