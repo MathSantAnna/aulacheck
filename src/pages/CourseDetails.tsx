@@ -26,32 +26,25 @@ import { useState } from 'react';
 import { StudentFrequencyTable } from '../components/StudentFrequencyTable';
 import { useAuth } from '../hooks/auth';
 import LowFrequencyStudentsModal from '../components/LowFrequencyStudentsModal';
-
+import * as XLSX from 'xlsx';
 
 export function CourseDetails() {
   const location = useLocation();
-
   const { newRollCall } = location.state || false;
-
   const { isStudent } = useAuth();
-
   const { uuid } = useParams();
-
   const navigate = useNavigate();
-
   const [open, setOpen] = useState(false);
 
-  const checkLowFrequencyStudent = (students: any[]) => {
-    const lowFrequencyStudents: any[] = [];
+  const checkLowFrequencyStudent = (students) => {
+    const lowFrequencyStudents = [];
     students.forEach(student => {
       if (student.classroomDetails.frequence < 80) {
         lowFrequencyStudents.push(student);
       }
     });
-
     return lowFrequencyStudents;
   }
-
 
   const courseQuery = useQuery({
     queryKey: ['GET_COURSE'],
@@ -59,16 +52,12 @@ export function CourseDetails() {
   });
 
   const course = courseQuery.data;
-
-  console.log(course);
-
   const teacherQuery = useQuery({
     queryKey: ['GET_TEACHER'],
     queryFn: () => getTeacherByCourse(uuid || ''),
   });
 
   const teacher = teacherQuery.data;
-
   const queryStudents = useQuery({
     queryKey: [`GET_STUDENTS_${course?.uuid}`],
     queryFn: () => getStudentsByCourse(course?.uuid || ''),
@@ -77,6 +66,20 @@ export function CourseDetails() {
   const students = queryStudents.data || [];
   const lowFrequencyStudents = checkLowFrequencyStudent(students);
 
+  const generateExcelReport = () => {
+    const data = students.map(student => ({
+      Nome: student.nmstudent,
+      Email: student.email,
+      Faltas: student.classroomDetails.numberOfAbsent,
+      Frequência: student.classroomDetails.frequence
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Frequência dos Alunos');
+
+    XLSX.writeFile(workbook, 'Relatorio_Frequencia.xlsx');
+  };
 
   return (
     <div className='page-content'>
@@ -86,8 +89,15 @@ export function CourseDetails() {
           <h4>Detalhes da Matéria</h4>
         </Col>
         <Col sm={6} className='d-flex justify-content-end'>
+        {!isStudent && <Button
+            onClick={generateExcelReport}
+            className='d-flex align-items-center gap-2'
+            style={{ marginRight: '10px' }}
+            color='success'
+          >
+            Exportar relatório Excel
+          </Button>}
           {!isStudent && <Button
-
             onClick={() => {
               navigate(paths.classRoomRollCall, { state: { course: course } });
             }}
@@ -97,12 +107,11 @@ export function CourseDetails() {
             <HowToReg />
             Realizar chamada
           </Button>}
+          
         </Col>
       </Row>
 
       <Card className='mt-3'>
-
-
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
@@ -111,11 +120,6 @@ export function CourseDetails() {
           }
           title={course && course.nmcourse}
           subheader={teacher && teacher.nmteacher}
-        /*  action={
-            <IconButton aria-label="settings">
-              <MoreVert />
-            </IconButton>
-          }*/
         />
       </Card>
 
@@ -138,7 +142,6 @@ export function CourseDetails() {
                 course={course}
               />
             ))}
-
           </TableBody>
         </Table>
       </TableContainer>
