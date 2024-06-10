@@ -135,6 +135,7 @@ export function CourseDetails() {
               <StudentFrequencyTable
                 key={item.uuid}
                 student={item}
+                course={course}
               />
             ))}
 

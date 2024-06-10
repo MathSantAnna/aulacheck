@@ -26,7 +26,7 @@ import { paths } from '../routes';
 import { useAuth } from '../hooks/auth';
 
 export function Teachers() {
-  const {isAdmin} = useAuth();
+  const {isAdmin, loggedUser} = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -192,10 +192,10 @@ export function Teachers() {
                     </TableCell>
                     <TableCell>
                       <DeleteOutline
-                        color={isAdmin ? 'error' : 'disabled'}
-                        onClick={() => handleOpenDeleteModal(item)}
+                        color={isAdmin && loggedUser.uuid !== item.uuid ? 'error' : 'disabled'}
+                        onClick={isAdmin && loggedUser.uuid !== item.uuid ? () => handleOpenDeleteModal(item) : () => { }}
                         style={{ cursor:  isAdmin ? 'pointer' : 'not-allowed' }}
-                        disabled={!isAdmin}
+                        disabled={!isAdmin && loggedUser.uuid === item.uuid }
                       />
                     </TableCell>
                   </TableRow>

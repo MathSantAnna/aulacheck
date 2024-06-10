@@ -68,3 +68,8 @@ export async function getRollCallByDate(courseId: string, date: Date) {
 export async function deleteCourse(uuid: string) {
   await api.delete(`/course/${uuid}`);
 }
+
+
+export async function updateClassRoom(uuid: string, presence: any) {
+  await api.patch(`/classroom/${uuid}`, {presence: presence});
+}

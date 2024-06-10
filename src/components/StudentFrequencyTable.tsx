@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getCourseById, getStudentsByCourse, getTeacherByCourse } from '../services/courses';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getCourseById, getStudentsByCourse, getTeacherByCourse, updateClassRoom } from '../services/courses';
 import { Link } from 'react-router-dom';
 import { paths } from '../routes';
 import {
@@ -18,7 +18,9 @@ import {
     Box,
     Typography,
     Collapse,
-    Tooltip
+    Tooltip,
+    ToggleButtonGroup,
+    ToggleButton
 } from '@mui/material';
 import { MoreVert, HowToReg, InfoOutlined } from '@mui/icons-material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -28,12 +30,19 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Gauge } from '@mui/x-charts';
 import { useState } from 'react';
 import { useAuth } from '../hooks/auth';
+import { DefaultModal } from './DefaultModal';
 
 export const StudentFrequencyTable = (props: any) => {
 
     const { isStudent } = useAuth();
-    const { student } = props;
+    const { student, course } = props;
     const [open, setOpen] = useState(false);
+    const [isEditPresenceModalOpen, setIsEditPresenceModalOpen] = useState(false);
+    const [presence, setPresence] = useState(false);
+    const [selectedClassroom, setSelectedClassroom] = useState({} as any);
+    const [studentData, setStudentData] = useState(student);
+
+    const queryClient = useQueryClient();
 
     function getCurrentFormattedDate(historyDate: any) {
         const date = new Date(historyDate);
@@ -42,6 +51,43 @@ export const StudentFrequencyTable = (props: any) => {
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
     }
+
+
+    const mutationUpdateClassRoom = useMutation({
+        mutationFn: (data: { uuid: any, presence: any }) => updateClassRoom(data.uuid, data.presence),
+        onSuccess: () => {
+            queryClient.invalidateQueries([`GET_STUDENTS_${course?.uuid}`]);
+            // Update the local state to reflect the changes instantly
+            const updatedHistory = studentData.classroomDetails.history.map((entry: any) => {
+                if (entry.uuid === selectedClassroom.uuid) {
+                    return { ...entry, presence: presence };
+                }
+                return entry;
+            });
+            setStudentData({
+                ...studentData,
+                classroomDetails: {
+                    ...studentData.classroomDetails,
+                    history: updatedHistory
+                }
+            });
+        },
+    });
+
+    function handleEditClick(classroomDetails: any) {
+        setSelectedClassroom(classroomDetails);
+        setPresence(classroomDetails.presence);
+        setIsEditPresenceModalOpen(true);
+    }
+
+    function handleEditPresence() {
+        mutationUpdateClassRoom.mutate({ uuid: selectedClassroom.uuid, presence: presence });
+        setIsEditPresenceModalOpen(false);
+    }
+
+
+
+
 
     return (
         <>
@@ -111,7 +157,7 @@ export const StudentFrequencyTable = (props: any) => {
                                                         fontSize='small'
                                                         style={{ cursor: 'pointer', color: '#6c757d' }}
                                                         onClick={() => {
-                                                            console.log('Editando presença');
+                                                            handleEditClick(historyRow)
                                                         }}
                                                     />
                                                 </TableCell>}
@@ -124,6 +170,28 @@ export const StudentFrequencyTable = (props: any) => {
                     </Collapse>
                 </TableCell>
             </TableRow>
+            <DefaultModal
+                title={`Editar presença de ${student.nmstudent}`}
+                isOpen={isEditPresenceModalOpen}
+                onConfirm={() => handleEditPresence()}
+                onCancel={() => setIsEditPresenceModalOpen(false)}
+            >
+                <div className='text-center'>
+                    <ToggleButtonGroup
+                        value={presence}
+                        exclusive
+                        aria-label="presença"
+                        size='small'
+                    >
+                        <ToggleButton color='primary' onClick={() => setPresence(true)} value={true} aria-label="Primeiro periodo">
+                            Presente
+                        </ToggleButton>
+                        <ToggleButton color='primary' onClick={() => setPresence(false)} value={false} aria-label="Segundo periodo">
+                            Ausente
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </div>
+            </DefaultModal>
         </>
     )
 
