@@ -60,15 +60,25 @@ export function Teachers() {
   };
 
   const handleCreate = async () => {
+    if (newTeacherName.trim() === '' || newTeacherEmail.trim() === '') {
+      setIsOpen(false);
+      setAlertMessage('Nome e e-mail do professor não podem estar em branco.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      return;
+    }
+  
     try {
       await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: newTeacherIsAdmin });
       setIsOpen(false);
-      // setSuccessOpen(true);
+      setAlertMessage('Professor criado com sucesso.');
+      setAlertSeverity('success');
+      setSuccessOpen(true);
     } catch (err) {
-      setIsOpen(false);
-      // setErrorOpen(true);
+      setAlertMessage('Erro ao criar professor. Tente novamente.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
     }
-
   }
 
   console.log(newTeacherIsAdmin);

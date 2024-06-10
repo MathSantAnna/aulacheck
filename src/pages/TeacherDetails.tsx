@@ -43,6 +43,8 @@ export function TeacherDetails() {
   const { control, handleSubmit, reset } = useForm();
   const queryClient = useQueryClient();
   const [successOpen, setSuccessOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState('warning');
   const [anchorEl, setAnchorEl] = useState(null);
 
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
@@ -60,11 +62,12 @@ export function TeacherDetails() {
 
   const ableToEdit = loggedUser.uuid === teacher?.uuid;
 
- 
   const mutation = useMutation({
     mutationFn: (data) => updateTeacher(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['GET_TEACHER', id]);
+      setAlertMessage('Operação realizada com sucesso!');
+      setAlertSeverity('success');
       setSuccessOpen(true);
     },
   });
@@ -88,11 +91,27 @@ export function TeacherDetails() {
   };
 
   const handleEditNameConfirm = (data) => {
+    if (data.nmteacher.trim() === '') {
+      setIsEditNameModalOpen(false);
+      setAlertMessage('O nome não pode estar em branco.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      return;
+    }
+
     mutation.mutate({ nmteacher: data.nmteacher });
     toggleEditNameModal();
   };
 
   const handleEditPasswordConfirm = (data) => {
+    if (data.password.trim() === '') {
+      setIsEditPasswordModalOpen(false);
+      setAlertMessage('A senha não pode estar em branco.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      return;
+    }
+
     mutation.mutate({ password: data.password });
     toggleEditPasswordModal();
   };
@@ -101,6 +120,7 @@ export function TeacherDetails() {
     <Container>
       <Collapse in={successOpen}>
         <Alert
+          severity={alertSeverity}
           action={
             <IconButton
               aria-label="close"
@@ -115,7 +135,7 @@ export function TeacherDetails() {
           }
           sx={{ mb: 2 }}
         >
-          Operação realizada com sucesso!
+          {alertMessage}
         </Alert>
       </Collapse>
     
