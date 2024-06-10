@@ -26,6 +26,7 @@ import { useForm } from 'react-hook-form';
 import { blue } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { se } from 'date-fns/locale';
 
 const formatStudentCourses = (student) => {
   if (!student.courses || student.courses.length === 0) {
@@ -37,7 +38,7 @@ const formatStudentCourses = (student) => {
 
 export function StudentDetails() {
   const { uuid } = useParams();
-  
+
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
   const [isEditPasswordModalOpen, setIsEditPasswordModalOpen] = useState(false);
   const [currentName, setCurrentName] = useState('');
@@ -45,6 +46,8 @@ export function StudentDetails() {
   const { control, handleSubmit, reset } = useForm();
   const queryClient = useQueryClient();
   const [successOpen, setSuccessOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertSeverity, setAlertSeverity] = useState('warning');
   const [anchorEl, setAnchorEl] = useState(null);
 
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
@@ -64,6 +67,8 @@ export function StudentDetails() {
     mutationFn: (data) => updateStudent(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries(['GET_STUDENT', id]);
+      setAlertMessage('Operação realizada com sucesso!');
+      setAlertSeverity('success');
       setSuccessOpen(true);
     },
   });
@@ -80,18 +85,32 @@ export function StudentDetails() {
   const handleEditPasswordClick = () => {
     if (student) {
       setCurrentPassword(student.password);
-      reset({ password: '' }); 
+      reset({ password: '' });
       toggleEditPasswordModal();
     }
     handleMenuClose();
   };
 
   const handleEditNameConfirm = (data) => {
+    if (data.nmstudent.trim() === '') {
+      setIsEditNameModalOpen(false);
+      setAlertMessage('O nome não pode estar em branco.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      return;
+    }
     mutation.mutate({ nmstudent: data.nmstudent });
     toggleEditNameModal();
   };
 
   const handleEditPasswordConfirm = (data) => {
+    if (data.password.trim() === '') {
+      setIsEditPasswordModalOpen(false);
+      setAlertMessage('A senha não pode estar em branco.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      return;
+    }
     mutation.mutate({ password: data.password });
     toggleEditPasswordModal();
   };
@@ -100,6 +119,7 @@ export function StudentDetails() {
     <>
       <Collapse in={successOpen}>
         <Alert
+          severity={alertSeverity}
           action={
             <IconButton
               aria-label="close"
@@ -114,10 +134,10 @@ export function StudentDetails() {
           }
           sx={{ mb: 2 }}
         >
-          Operação realizada com sucesso!
+          {alertMessage}
         </Alert>
       </Collapse>
-    
+
       {!isLoading && student && (
         <div className='page-content'>
           <Row>
