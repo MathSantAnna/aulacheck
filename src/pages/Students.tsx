@@ -31,31 +31,20 @@ import { getClass } from '../services/class';
 
 export function Students() {
   const [isOpen, setIsOpen] = useState(false);
-
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
-
   const [successOpen, setSuccessOpen] = useState(false);
-
   const [newStudentName, setNewStudentName] = useState('');
-
   const [newStudentEmail, setNewStudentEmail] = useState('');
-
   const [newParantEmail, setNewParentEmail] = useState('');
-
   const [selectedClass, setSelectedClass] = useState('');
-
   const [alertSeverity, setAlertSeverity] = useState('warning');
-
   const [alertMessage, setAlertMessage] = useState('');
-
-  
+  const [studentOnDelete, setStudentOnDelete] = useState({});
 
   const handleOpen = () => setIsOpen((prev) => !prev);
 
-  const [studentOnDelete, setStudentOnDelete] = useState({});
-
-  const handleOpenDeleteModal = (teacher: any) => {
-    setStudentOnDelete(teacher)
+  const handleOpenDeleteModal = (student: any) => {
+    setStudentOnDelete(student)
     return setIsOpenDeleteModal((prev) => !prev);
   }
 
@@ -82,38 +71,38 @@ export function Students() {
   };
 
   const handleCreate = async () => {
+    if (newStudentName.trim() === '' || newStudentEmail.trim() === '' || newParantEmail.trim() === '' || selectedClass.trim() === '') {
+      setAlertMessage('Por favor, preencha todos os campos.');
+      setAlertSeverity('error');
+      setSuccessOpen(true);
+      setIsOpen(false);
+      return;
+    }
+
     try {
       await mutationCreate.mutate({ nmstudent: newStudentName, email: newStudentEmail, classId: selectedClass, parentemail: newParantEmail });
       setIsOpen(false);
-      // setSuccessOpen(true);
     } catch (err) {
       setIsOpen(false);
-      // setErrorOpen(true);
+      console.error(err);
     }
-
   }
-
 
   const query = useQuery({
     queryKey: ['GET_STUDENTS'],
     queryFn: getStudents,
   });
 
-
   const queryClass = useQuery({
     queryKey: ['GET_CLASS'],
     queryFn: getClass,
   });
 
-
-
-
-
-
   return (
     <Container>
       <Collapse in={successOpen}>
         <Alert
+          severity={alertSeverity}
           action={
             <IconButton
               aria-label="close"
@@ -122,14 +111,13 @@ export function Students() {
               onClick={() => {
                 setSuccessOpen(false);
               }}
-
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
           }
           sx={{ mb: 2 }}
         >
-          Aluno excluído com sucesso!
+          {alertMessage}
         </Alert>
       </Collapse>
       {query.isLoading ? (
@@ -221,7 +209,7 @@ export function Students() {
               <div className='d-flex flex-column gap-2 w-100'>
                 Nome do aluno
                 <Input
-                  name='nmteacher'
+                  name='nmstudent'
                   label='Nome do aluno'
                   value={newStudentName}
                   onChange={(event: any) => setNewStudentName(event.target.value)}
@@ -255,9 +243,8 @@ export function Students() {
                   onChange={(event) => setSelectedClass(event.target.value)}
                 >
                   {queryClass.data?.map((item) => (
-                  <MenuItem value={item.uuid}>{item.nmclass}</MenuItem>
-                ))}
-  
+                    <MenuItem key={item.uuid} value={item.uuid}>{item.nmclass}</MenuItem>
+                  ))}
                 </Select>
               </div>
             </form>
