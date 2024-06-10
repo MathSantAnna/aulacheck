@@ -1,13 +1,11 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getCourseById, getStudentsByCourse, getTeacherByCourse } from '../services/courses';
-import { Link } from 'react-router-dom';
 import { paths } from '../routes';
 import {
   Avatar,
   Card,
   CardHeader,
-  IconButton,
   Paper,
   TableContainer,
   Table,
@@ -15,14 +13,10 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Box,
-  Typography,
-  Collapse
 } from '@mui/material';
-import { MoreVert, HowToReg } from '@mui/icons-material';
+import { HowToReg } from '@mui/icons-material';
 import { blue } from '@mui/material/colors';
 import { Button, Col, Row } from 'reactstrap';
-import { useState } from 'react';
 import { StudentFrequencyTable } from '../components/StudentFrequencyTable';
 import { useAuth } from '../hooks/auth';
 import LowFrequencyStudentsModal from '../components/LowFrequencyStudentsModal';
@@ -34,7 +28,7 @@ export function CourseDetails() {
   const { isStudent } = useAuth();
   const { uuid } = useParams();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+
 
   const checkLowFrequencyStudent = (students) => {
     const lowFrequencyStudents = [];

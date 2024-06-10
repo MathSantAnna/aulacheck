@@ -2,9 +2,7 @@ import { AddOutlined, MoreVert } from '@mui/icons-material';
 import {
   Alert,
   Avatar,
-  Box,
   Card,
-  CardActions,
   CardContent,
   CardHeader,
   Collapse,
@@ -12,11 +10,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Paper,
-  TableContainer,
-  Typography
 } from '@mui/material';
-import { Button, Col, Row } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import { getStudent, updateStudent } from '../services/students';
 import { useParams } from 'react-router-dom';
 import { DefaultModal } from '../components/DefaultModal';
@@ -26,7 +21,7 @@ import { useForm } from 'react-hook-form';
 import { blue } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { se } from 'date-fns/locale';
+
 
 const formatStudentCourses = (student) => {
   if (!student.courses || student.courses.length === 0) {

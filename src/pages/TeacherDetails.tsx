@@ -1,10 +1,8 @@
-import { AddOutlined, MoreVert } from '@mui/icons-material';
+import { MoreVert } from '@mui/icons-material';
 import {
   Alert,
   Avatar,
-  Box,
   Card,
-  CardActions,
   CardContent,
   CardHeader,
   Collapse,
@@ -12,11 +10,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  Paper,
-  TableContainer,
-  Typography
 } from '@mui/material';
-import { Button, Col, Container, Row } from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import { getTeacher, updateTeacher } from '../services/teachers';
 import { useParams } from 'react-router-dom';
 import { DefaultModal } from '../components/DefaultModal';

@@ -15,6 +15,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getStudentsByCourse, getTeacherByCourse, submitAttendance, getRollCallByDate } from '../services/courses';
 import { getClass } from '../services/class';
 import { paths } from '../routes';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 export function ClassRoomRollCall() {
     const [checked, setChecked] = React.useState<{ [key: string]: boolean }>({});
@@ -22,6 +27,8 @@ export function ClassRoomRollCall() {
     const [periodOneDisabled, setPeriodOneDisabled] = React.useState(false);
     const [periodTwoDisabled, setPeriodTwoDisabled] = React.useState(false);
     const [bothPeriodsDisabled, setBothPeriodsDisabled] = React.useState(false);
+    const [callDate, setCallDate] = React.useState(dayjs(new Date()));
+
 
     const [period, setPeriod] = React.useState("");
     const navigate = useNavigate();
@@ -35,12 +42,13 @@ export function ClassRoomRollCall() {
 
     const queryRollCallByDate = useQuery({
         queryKey: ['GET_ROLL_CALL_BY_DATE'],
-        queryFn: () => getRollCallByDate(course.uuid, new Date()),
+        queryFn: () => getRollCallByDate(course.uuid, callDate.toDate()),
     });
 
     const pastRollCall = queryRollCallByDate.data || {};
+    const [firstPeriod, setFirstPeriod] = React.useState(pastRollCall.firstPeriod);
+    const [secondPeriod, setSecondPeriod] = React.useState(pastRollCall.secondPeriod);
 
-    const { firstPeriod, secondPeriod } = pastRollCall;
 
     const students = queryStudents.data || [];
 
@@ -70,43 +78,12 @@ export function ClassRoomRollCall() {
         }));
     };
 
-    const handlePeriodAble = (pastCall: any) => {
-        const { firstPeriod, secondPeriod } = pastCall;
+    const handleDateChange = async (newDate: any) => {
+        setPeriod(newDate);
+        const newCheckCall = await getRollCallByDate(course.uuid, newDate);
+        setFirstPeriod(newCheckCall.firstPeriod);
+        setSecondPeriod(newCheckCall.secondPeriod);
 
-        setPeriodOneDisabled(!firstPeriod);
-        setPeriodTwoDisabled(!secondPeriod);
-
-        let newPeriod = period;
-
-        if (period === "1" && firstPeriod) {
-            if (!secondPeriod) {
-                newPeriod = "2";
-            } else {
-                newPeriod = "3";
-                setBothPeriodsDisabled(true);
-            }
-        }
-
-        if (period === "2" && secondPeriod) {
-            if (!firstPeriod) {
-                newPeriod = "1";
-            } else {
-                newPeriod = "3";
-                setBothPeriodsDisabled(true);
-            }
-        }
-
-        if (newPeriod !== period) {
-            setPeriod(newPeriod);
-        }
-    }
-
-    function getCurrentFormattedDate() {
-        const today = new Date();
-        const day = String(today.getDate()).padStart(2, '0');
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const year = today.getFullYear();
-        return `${day}/${month}/${year}`;
     }
 
     const mutateAttendance = useMutation({
@@ -121,7 +98,8 @@ export function ClassRoomRollCall() {
             courseId: course.uuid,
             studentId: student.uuid,
             presence: !!checked[student.uuid],
-            period: Number(period)
+            period: Number(period),
+            date: callDate.toDate()
         }));
 
         console.log(attendanceData)
@@ -155,8 +133,11 @@ export function ClassRoomRollCall() {
                             </Typography>
                             <Typography gutterBottom variant="h6" component="div">
                                 <Box display="flex" alignItems="center">
-                                    <TodayIcon />
-                                    <Box ml={1}>{getCurrentFormattedDate()}</Box>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <DemoContainer components={['DatePicker']}>
+                                            <DatePicker onChange={(newValue: any) => handleDateChange(newValue)} disableFuture={true} value={callDate} defaultValue={dayjs(new Date())} format={"DD/MM/YYYY"} label="Data da aula" />
+                                        </DemoContainer>
+                                    </LocalizationProvider>
                                 </Box>
                             </Typography>
                         </Stack>
