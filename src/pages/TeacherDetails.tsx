@@ -12,7 +12,11 @@ import {
   MenuItem,
 } from '@mui/material';
 import { Col, Container, Row } from 'reactstrap';
-import { getTeacher, updateTeacher } from '../services/teachers';
+import {
+  NewTeacherProps,
+  getTeacher,
+  updateTeacher,
+} from '../services/teachers';
 import { useParams } from 'react-router-dom';
 import { DefaultModal } from '../components/DefaultModal';
 import { useState } from 'react';
@@ -25,10 +29,9 @@ import { useAuth } from '../hooks/auth';
 
 const formatTeacherCourses = (teacher) => {
   return '';
-}
+};
 
 export function TeacherDetails() {
-
   const { isAdmin, loggedUser } = useAuth();
   const { uuid } = useParams();
   const [isEditNameModalOpen, setIsEditNameModalOpen] = useState(false);
@@ -43,12 +46,13 @@ export function TeacherDetails() {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
-  const toggleEditPasswordModal = () => setIsEditPasswordModalOpen((prev) => !prev);
+  const toggleEditPasswordModal = () =>
+    setIsEditPasswordModalOpen((prev) => !prev);
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   const id = uuid || '';
-  
+
   const { data: teacher, isLoading } = useQuery({
     queryKey: ['GET_TEACHER', id],
     queryFn: () => getTeacher(id),
@@ -58,9 +62,9 @@ export function TeacherDetails() {
   const ableToEdit = loggedUser.uuid === teacher?.uuid;
 
   const mutation = useMutation({
-    mutationFn: (data) => updateTeacher(id, data),
+    mutationFn: (data: NewTeacherProps) => updateTeacher(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_TEACHER', id]);
+      queryClient.invalidateQueries({ queryKey: ['GET_TEACHER', id] });
       setAlertMessage('Operação realizada com sucesso!');
       setAlertSeverity('success');
       setSuccessOpen(true);
@@ -79,7 +83,7 @@ export function TeacherDetails() {
   const handleEditPasswordClick = () => {
     if (teacher) {
       setCurrentPassword(teacher.password);
-      reset({ password: '' }); 
+      reset({ password: '' });
       toggleEditPasswordModal();
     }
     handleMenuClose();
@@ -118,14 +122,14 @@ export function TeacherDetails() {
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -133,7 +137,7 @@ export function TeacherDetails() {
           {alertMessage}
         </Alert>
       </Collapse>
-    
+
       {!isLoading && teacher && (
         <div className='page-content'>
           <Row>
@@ -145,7 +149,7 @@ export function TeacherDetails() {
           <Card>
             <CardHeader
               avatar={
-                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                <Avatar sx={{ bgcolor: red[500] }} aria-label='recipe'>
                   {teacher && teacher.nmteacher.charAt(0).toUpperCase()}
                 </Avatar>
               }
@@ -153,7 +157,7 @@ export function TeacherDetails() {
               subheader={teacher && teacher.email}
               action={
                 <>
-                  <IconButton aria-label="settings" onClick={handleMenuOpen}>
+                  <IconButton aria-label='settings' onClick={handleMenuOpen}>
                     <MoreVert />
                   </IconButton>
                   <Menu
@@ -161,15 +165,23 @@ export function TeacherDetails() {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                   >
-                    {(ableToEdit || isAdmin) && <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>}
-                   {ableToEdit && <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>}
+                    {(ableToEdit || isAdmin) && (
+                      <MenuItem onClick={handleEditNameClick}>
+                        Editar Nome
+                      </MenuItem>
+                    )}
+                    {ableToEdit && (
+                      <MenuItem onClick={handleEditPasswordClick}>
+                        Editar Senha
+                      </MenuItem>
+                    )}
                   </Menu>
                 </>
               }
             />
             <CardContent>
               <ListItemText
-                primary="Matérias"
+                primary='Matérias'
                 primaryTypographyProps={{
                   fontSize: 15,
                   fontWeight: 'medium',

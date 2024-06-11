@@ -16,8 +16,6 @@ type CreateClassProps = {
 export async function getClass() {
   const { data } = await api.get<ClassProps[]>('/class');
 
-  console.log('data', data);
-
   return data;
 }
 

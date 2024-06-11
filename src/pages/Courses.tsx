@@ -52,6 +52,8 @@ export function Courses() {
   const [courseOnDelete, setCourseOnDelete] = useState<any>({});
 
   const handleOpenDeleteModal = (course: any) => {
+    if (!isAdmin) return;
+
     setCourseOnDelete(course);
     return setIsOpenDeleteModal((prev) => !prev);
   };
@@ -103,7 +105,6 @@ export function Courses() {
   };
 
   const isStudent = !!loggedUser.nmstudent;
-  console.log('isStudent', isStudent);
 
   const query = useQuery({
     queryKey: ['GET_LESSONS'],
@@ -194,10 +195,12 @@ export function Courses() {
                       </Link>
                     </TableCell>
                     {/* <TableCell align='center'>{item.classId}</TableCell> */}
-                    <TableCell align='center'>{}</TableCell>
+                    <TableCell align='center'>
+                      {item.nmteacher || 'Não vinculado'}
+                    </TableCell>
                     <TableCell align='right'>
                       <DeleteOutline
-                        color='error'
+                        color={isAdmin ? 'error' : 'disabled'}
                         onClick={() => handleOpenDeleteModal(item)}
                         style={{ cursor: 'pointer' }}
                       />

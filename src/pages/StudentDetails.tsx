@@ -11,7 +11,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
-import { Col, Row } from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import { getStudent, updateStudent } from '../services/students';
 import { useParams } from 'react-router-dom';
 import { DefaultModal } from '../components/DefaultModal';
@@ -22,14 +22,13 @@ import { blue } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-
 const formatStudentCourses = (student) => {
   if (!student.courses || student.courses.length === 0) {
     return 'Nenhum curso encontrado';
   }
-  const courseNames = student.courses.map(course => course.nmcourse);
+  const courseNames = student.courses.map((course) => course.nmcourse);
   return courseNames.join(', ');
-}
+};
 
 export function StudentDetails() {
   const { uuid } = useParams();
@@ -46,7 +45,8 @@ export function StudentDetails() {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const toggleEditNameModal = () => setIsEditNameModalOpen((prev) => !prev);
-  const toggleEditPasswordModal = () => setIsEditPasswordModalOpen((prev) => !prev);
+  const toggleEditPasswordModal = () =>
+    setIsEditPasswordModalOpen((prev) => !prev);
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
@@ -61,7 +61,7 @@ export function StudentDetails() {
   const mutation = useMutation({
     mutationFn: (data) => updateStudent(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_STUDENT', id]);
+      queryClient.invalidateQueries({ queryKey: ['GET_STUDENT', id] });
       setAlertMessage('Operação realizada com sucesso!');
       setAlertSeverity('success');
       setSuccessOpen(true);
@@ -111,20 +111,20 @@ export function StudentDetails() {
   };
 
   return (
-    <>
+    <Container>
       <Collapse in={successOpen}>
         <Alert
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -144,7 +144,7 @@ export function StudentDetails() {
           <Card>
             <CardHeader
               avatar={
-                <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
+                <Avatar sx={{ bgcolor: blue[500] }} aria-label='recipe'>
                   {student && student.nmstudent.charAt(0).toUpperCase()}
                 </Avatar>
               }
@@ -152,7 +152,7 @@ export function StudentDetails() {
               subheader={student && student.email}
               action={
                 <>
-                  <IconButton aria-label="settings" onClick={handleMenuOpen}>
+                  <IconButton aria-label='settings' onClick={handleMenuOpen}>
                     <MoreVert />
                   </IconButton>
                   <Menu
@@ -160,15 +160,19 @@ export function StudentDetails() {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                   >
-                    <MenuItem onClick={handleEditNameClick}>Editar Nome</MenuItem>
-                    <MenuItem onClick={handleEditPasswordClick}>Editar Senha</MenuItem>
+                    <MenuItem onClick={handleEditNameClick}>
+                      Editar Nome
+                    </MenuItem>
+                    <MenuItem onClick={handleEditPasswordClick}>
+                      Editar Senha
+                    </MenuItem>
                   </Menu>
                 </>
               }
             />
             <CardContent>
               <ListItemText
-                primary="Cursos"
+                primary='Cursos'
                 primaryTypographyProps={{
                   fontSize: 15,
                   fontWeight: 'medium',
@@ -218,6 +222,6 @@ export function StudentDetails() {
           </DefaultModal>
         </div>
       )}
-    </>
+    </Container>
   );
 }

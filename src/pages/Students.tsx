@@ -19,14 +19,19 @@ import { Input } from 'reactstrap';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Col, Container, Row } from 'reactstrap';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import { DefaultModal } from '../components/DefaultModal';
-import { getStudents, deleteStudent, createStudent } from '../services/students';
+import {
+  getStudents,
+  deleteStudent,
+  createStudent,
+} from '../services/students';
 
 import { paths } from '../routes';
 import { getClass } from '../services/class';
+import { useAuth } from '../hooks/auth';
 
 export function Students() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,24 +47,35 @@ export function Students() {
 
   const handleOpen = () => setIsOpen((prev) => !prev);
 
-  const handleOpenDeleteModal = (student: any) => {
-    setStudentOnDelete(student)
-    return setIsOpenDeleteModal((prev) => !prev);
-  }
+  const { isAdmin } = useAuth();
 
-  const queryClient = useQueryClient();
+  const handleOpenDeleteModal = (student: any) => {
+    if (!isAdmin) return;
+
+    setStudentOnDelete(student);
+    return setIsOpenDeleteModal((prev) => !prev);
+  };
 
   const mutation = useMutation({
     mutationFn: deleteStudent,
+    onError() {
+      setAlertSeverity('error');
+      setAlertMessage('Não foi possível deletar');
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_STUDENTS']);
+      query.refetch();
+      setAlertSeverity('success');
+      setAlertMessage('Deletado com sucesso!');
     },
   });
 
   const mutationCreate = useMutation({
     mutationFn: createStudent,
+
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_STUDENTS']);
+      query.refetch();
+      setAlertSeverity('success');
+      setAlertMessage('Criado com sucesso!');
     },
   });
 
@@ -70,7 +86,12 @@ export function Students() {
   };
 
   const handleCreate = async () => {
-    if (newStudentName.trim() === '' || newStudentEmail.trim() === '' || newParantEmail.trim() === '' || selectedClass.trim() === '') {
+    if (
+      newStudentName.trim() === '' ||
+      newStudentEmail.trim() === '' ||
+      newParantEmail.trim() === '' ||
+      selectedClass.trim() === ''
+    ) {
       setAlertMessage('Por favor, preencha todos os campos.');
       setAlertSeverity('error');
       setSuccessOpen(true);
@@ -79,13 +100,18 @@ export function Students() {
     }
 
     try {
-      await mutationCreate.mutate({ nmstudent: newStudentName, email: newStudentEmail, classId: selectedClass, parentemail: newParantEmail });
+      mutationCreate.mutate({
+        nmstudent: newStudentName,
+        email: newStudentEmail,
+        classId: selectedClass,
+        parentemail: newParantEmail,
+      });
       setIsOpen(false);
     } catch (err) {
       setIsOpen(false);
       console.error(err);
     }
-  }
+  };
 
   const query = useQuery({
     queryKey: ['GET_STUDENTS'],
@@ -104,14 +130,14 @@ export function Students() {
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -139,6 +165,7 @@ export function Students() {
                 onClick={handleOpen}
                 className='d-flex align-items-center gap-2'
                 color='primary'
+                disabled={!isAdmin}
               >
                 <AddOutlined />
                 Adicionar
@@ -152,7 +179,6 @@ export function Students() {
                   <TableCell>Nome</TableCell>
                   <TableCell align='right'>E-mail</TableCell>
                   <TableCell align='right'>E-mail do responsável</TableCell>
-                  <TableCell align='right'>Data de Matrícula</TableCell>
                   <TableCell align='right'>Criado em</TableCell>
                   <TableCell align='right'>Editado em</TableCell>
                   <TableCell align='right'></TableCell>
@@ -163,19 +189,14 @@ export function Students() {
                   <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
-                        to={paths.studentsDetails.replace(
-                          ':uuid',
-                          item.uuid
-                        )}
+                        to={paths.studentsDetails.replace(':uuid', item.uuid)}
                       >
                         {item.nmstudent}
                       </Link>
                     </TableCell>
                     <TableCell align='right'>{item.email}</TableCell>
                     <TableCell align='right'>{item.parentemail}</TableCell>
-                    <TableCell align='right'>
-                      {new Date(item.enrollmentDate).toLocaleString()}
-                    </TableCell>
+
                     <TableCell align='right'>
                       {new Date(item.created_at).toLocaleString()}
                     </TableCell>
@@ -183,10 +204,13 @@ export function Students() {
                       {new Date(item.updated_at).toLocaleString()}
                     </TableCell>
                     <TableCell>
-                      <Tooltip title='Deletar aluno' placement='top-start' arrow>
-
+                      <Tooltip
+                        title='Deletar aluno'
+                        placement='top-start'
+                        arrow
+                      >
                         <DeleteOutline
-                          color='error'
+                          color={isAdmin ? 'error' : 'disabled'}
                           onClick={() => handleOpenDeleteModal(item)}
                           style={{ cursor: 'pointer' }}
                         />
@@ -211,7 +235,9 @@ export function Students() {
                   name='nmstudent'
                   label='Nome do aluno'
                   value={newStudentName}
-                  onChange={(event: any) => setNewStudentName(event.target.value)}
+                  onChange={(event: any) =>
+                    setNewStudentName(event.target.value)
+                  }
                 />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
@@ -220,7 +246,9 @@ export function Students() {
                   name='email'
                   label='E-mail do aluno'
                   value={newStudentEmail}
-                  onChange={(event: any) => setNewStudentEmail(event.target.value)}
+                  onChange={(event: any) =>
+                    setNewStudentEmail(event.target.value)
+                  }
                 />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
@@ -229,20 +257,24 @@ export function Students() {
                   name='email'
                   label='E-mail do responsável'
                   value={newParantEmail}
-                  onChange={(event: any) => setNewParentEmail(event.target.value)}
+                  onChange={(event: any) =>
+                    setNewParentEmail(event.target.value)
+                  }
                 />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
-                <InputLabel id="demo-simple-select-label">Turma</InputLabel>
+                <InputLabel id='demo-simple-select-label'>Turma</InputLabel>
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
+                  labelId='demo-simple-select-label'
+                  id='demo-simple-select'
                   value={selectedClass}
-                  label="Turma"
+                  label='Turma'
                   onChange={(event) => setSelectedClass(event.target.value)}
                 >
                   {queryClass.data?.map((item) => (
-                    <MenuItem key={item.uuid} value={item.uuid}>{item.nmclass}</MenuItem>
+                    <MenuItem key={item.uuid} value={item.uuid}>
+                      {item.nmclass}
+                    </MenuItem>
                   ))}
                 </Select>
               </div>
@@ -258,7 +290,10 @@ export function Students() {
             cancelLabel='Cancelar'
             confirmButtonColor='danger'
           >
-            <p>Tem certeza de que deseja excluir o aluno <strong>{studentOnDelete.nmstudent}</strong>?</p>
+            <p>
+              Tem certeza de que deseja excluir o aluno{' '}
+              <strong>{studentOnDelete.nmstudent}</strong>?
+            </p>
           </DefaultModal>
         </div>
       )}

@@ -16,17 +16,21 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Col, Container, Row } from 'reactstrap';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AddOutlined, DeleteOutline, } from '@mui/icons-material';
+import { AddOutlined, DeleteOutline } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import Alert from '@mui/material/Alert';
 import { DefaultModal } from '../components/DefaultModal';
 import { Input } from 'reactstrap';
-import { getTeachers, deleteTeacher, createTeacher } from '../services/teachers';
+import {
+  getTeachers,
+  deleteTeacher,
+  createTeacher,
+} from '../services/teachers';
 import { paths } from '../routes';
 import { useAuth } from '../hooks/auth';
 
 export function Teachers() {
-  const {isAdmin, loggedUser} = useAuth();
+  const { isAdmin, loggedUser } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -49,9 +53,9 @@ export function Teachers() {
   const [teacherOnDelete, setTeacherOnDelete] = useState({});
 
   const handleOpenDeleteModal = (teacher: any) => {
-    setTeacherOnDelete(teacher)
+    setTeacherOnDelete(teacher);
     return setIsOpenDeleteModal((prev) => !prev);
-  }
+  };
 
   const handleDelete = (uuidteacher: string) => {
     mutation.mutate(uuidteacher);
@@ -67,9 +71,13 @@ export function Teachers() {
       setSuccessOpen(true);
       return;
     }
-  
+
     try {
-      await mutationCreate.mutate({ nmteacher: newTeacherName, email: newTeacherEmail, admin: newTeacherIsAdmin });
+      await mutationCreate.mutate({
+        nmteacher: newTeacherName,
+        email: newTeacherEmail,
+        admin: newTeacherIsAdmin,
+      });
       setIsOpen(false);
       setAlertMessage('Professor criado com sucesso.');
       setAlertSeverity('success');
@@ -79,13 +87,9 @@ export function Teachers() {
       setAlertSeverity('error');
       setSuccessOpen(true);
     }
-  }
-
-  console.log(newTeacherIsAdmin);
-  
+  };
 
   const queryClient = useQueryClient();
-
 
   const query = useQuery({
     queryKey: ['GET_TEACHERS'],
@@ -95,41 +99,40 @@ export function Teachers() {
   const mutation = useMutation({
     mutationFn: deleteTeacher,
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_TEACHERS']);
+      queryClient.invalidateQueries({ queryKey: ['GET_TEACHERS'] });
       setAlertMessage('Professor excluído com sucesso.');
       setAlertSeverity('success');
     },
     onError: () => {
-      setAlertMessage('Oops! Este professor está vinculado a matérias. Desvincule-o das disciplinas antes de excluí-lo');
+      setAlertMessage(
+        'Oops! Este professor está vinculado a matérias. Desvincule-o das disciplinas antes de excluí-lo'
+      );
       setAlertSeverity('error');
-    }
+    },
   });
 
   const mutationCreate = useMutation({
     mutationFn: createTeacher,
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_TEACHERS']);
+      queryClient.invalidateQueries({ queryKey: ['GET_TEACHERS'] });
     },
   });
 
-
-
   return (
-
     <Container>
       <Collapse in={successOpen}>
         <Alert
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -158,7 +161,7 @@ export function Teachers() {
                 className='d-flex align-items-center gap-2'
                 color='primary'
                 disabled={!isAdmin}
-                style={{ cursor:  isAdmin ? 'pointer' : 'not-allowed' }}
+                style={{ cursor: isAdmin ? 'pointer' : 'not-allowed' }}
               >
                 <AddOutlined />
                 Adicionar
@@ -182,10 +185,7 @@ export function Teachers() {
                   <TableRow key={item.uuid}>
                     <TableCell>
                       <Link
-                        to={paths.teacherDetails.replace(
-                          ':uuid',
-                          item.uuid
-                        )}
+                        to={paths.teacherDetails.replace(':uuid', item.uuid)}
                       >
                         {item.nmteacher}
                       </Link>
@@ -202,10 +202,18 @@ export function Teachers() {
                     </TableCell>
                     <TableCell>
                       <DeleteOutline
-                        color={isAdmin && loggedUser.uuid !== item.uuid ? 'error' : 'disabled'}
-                        onClick={isAdmin && loggedUser.uuid !== item.uuid ? () => handleOpenDeleteModal(item) : () => { }}
-                        style={{ cursor:  isAdmin ? 'pointer' : 'not-allowed' }}
-                        disabled={!isAdmin && loggedUser.uuid === item.uuid }
+                        color={
+                          isAdmin && loggedUser.uuid !== item.uuid
+                            ? 'error'
+                            : 'disabled'
+                        }
+                        onClick={
+                          isAdmin && loggedUser.uuid !== item.uuid
+                            ? () => handleOpenDeleteModal(item)
+                            : () => {}
+                        }
+                        style={{ cursor: isAdmin ? 'pointer' : 'not-allowed' }}
+                        disabled={!isAdmin && loggedUser.uuid === item.uuid}
                       />
                     </TableCell>
                   </TableRow>
@@ -227,7 +235,9 @@ export function Teachers() {
                   name='nmteacher'
                   label='Nome do professor'
                   value={newTeacherName}
-                  onChange={(event: any) => setNewTeacherName(event.target.value)}
+                  onChange={(event: any) =>
+                    setNewTeacherName(event.target.value)
+                  }
                 />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
@@ -236,7 +246,9 @@ export function Teachers() {
                   name='email'
                   label='E-mail do professor'
                   value={newTeacherEmail}
-                  onChange={(event: any) => setNewTeacherEmail(event.target.value)}
+                  onChange={(event: any) =>
+                    setNewTeacherEmail(event.target.value)
+                  }
                 />
               </div>
               <FormControlLabel
@@ -246,7 +258,7 @@ export function Teachers() {
                     onChange={() => setIsAdmin(!newTeacherIsAdmin)}
                   />
                 }
-                label="Administrador"
+                label='Administrador'
               />
             </form>
           </DefaultModal>
@@ -260,9 +272,11 @@ export function Teachers() {
             cancelLabel='Cancelar'
             confirmButtonColor='danger'
           >
-            <p>Tem certeza de que deseja excluir o professor <strong>{teacherOnDelete.nmteacher}</strong>?</p>
+            <p>
+              Tem certeza de que deseja excluir o professor{' '}
+              <strong>{teacherOnDelete.nmteacher}</strong>?
+            </p>
           </DefaultModal>
-
         </div>
       )}
     </Container>

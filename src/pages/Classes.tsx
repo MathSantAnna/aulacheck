@@ -21,16 +21,12 @@ import { paths } from '../routes';
 import { getStudents } from '../services/students';
 import CloseIcon from '@mui/icons-material/Close';
 import Alert from '@mui/material/Alert';
-
-
+import { useAuth } from '../hooks/auth';
 
 export function Classes() {
-  
   const [isOpen, setIsOpen] = useState(false);
 
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false);
-
-
 
   const [newClass, setNewClass] = useState('');
 
@@ -38,7 +34,9 @@ export function Classes() {
 
   const [classOnDelete, setClassOnDelete] = useState({});
 
-  const [alertSeverity, setAlertSeverity] = useState('warning');
+  const [alertSeverity, setAlertSeverity] = useState<
+    'success' | 'error' | 'warning'
+  >('warning');
 
   const [alertMessage, setAlertMessage] = useState('');
 
@@ -46,6 +44,7 @@ export function Classes() {
 
   const queryClient = useQueryClient();
 
+  const { isAdmin } = useAuth();
 
   const handleOpen = () => {
     setIsOpen((prev) => !prev);
@@ -55,29 +54,32 @@ export function Classes() {
     }
   };
 
-
-
   const handleOpenDeleteModal = (classOnDelete: any) => {
+    if (!isAdmin) return;
+
     setClassOnDelete(classOnDelete);
     return setIsOpenDeleteModal((prev) => !prev);
-
   };
 
   const mutationDeleteClass = useMutation({
     mutationFn: deleteClass,
     onSuccess: () => {
-      queryClient.invalidateQueries(['DELETE_CLASS']);
+      setAlertSeverity('success');
+      setAlertMessage('Removido com sucesso!');
+      query.refetch();
     },
     onError: () => {
-      setAlertMessage('Oops! Esta matéria não pode ser deletada. Desvincule os alunos antes de deletá-la.');
+      setAlertMessage(
+        'Oops! Esta matéria não pode ser deletada. Desvincule os alunos antes de deletá-la.'
+      );
       setAlertSeverity('error');
-    }
+    },
   });
 
   const mutationCreateClass = useMutation({
     mutationFn: createClass,
     onSuccess: () => {
-      queryClient.invalidateQueries(['GET_CLASSES']);
+      queryClient.invalidateQueries({ queryKey: ['GET_CLASSES'] });
     },
   });
 
@@ -85,33 +87,24 @@ export function Classes() {
     try {
       await mutationCreateClass.mutate({
         nmclass: newClass,
-        graduarion: newYear
+        graduarion: newYear,
       });
       setIsOpen(false);
     } catch (err) {
       setIsOpen(false);
     }
-  }
+  };
 
   const handleDeleteClass = async (uuid: string) => {
     mutationDeleteClass.mutate(uuid);
     setIsOpenDeleteModal(false);
     setSuccessOpen(true);
-  }
+  };
 
   const query = useQuery({
     queryKey: ['GET_CLASSES'],
     queryFn: getClass,
   });
-
-  const queryStudents = useQuery({
-    queryKey: ['GET_STUDENTS'],
-    queryFn: getStudents,
-  });
-
-  console.log(queryStudents);
-
-
 
   return (
     <Container>
@@ -120,14 +113,14 @@ export function Classes() {
           severity={alertSeverity}
           action={
             <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
+              aria-label='close'
+              color='inherit'
+              size='small'
               onClick={() => {
                 setSuccessOpen(false);
               }}
             >
-              <CloseIcon fontSize="inherit" />
+              <CloseIcon fontSize='inherit' />
             </IconButton>
           }
           sx={{ mb: 2 }}
@@ -155,6 +148,7 @@ export function Classes() {
                 onClick={handleOpen}
                 className='d-flex align-items-center gap-2'
                 color='primary'
+                disabled={!isAdmin}
               >
                 <AddOutlined />
                 Adicionar
@@ -189,7 +183,8 @@ export function Classes() {
                       <DeleteOutline
                         onClick={() => handleOpenDeleteModal(item)}
                         style={{ cursor: 'pointer' }}
-                        color='error' />
+                        color={isAdmin ? 'error' : 'disabled'}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -211,7 +206,8 @@ export function Classes() {
                   label='Nome da turma'
                   value={newClass}
                   onChange={(e) => setNewClass(e.target.value)}
-                  required />
+                  required
+                />
               </div>
               <div className='d-flex flex-column gap-2 w-100'>
                 Ano
@@ -221,7 +217,8 @@ export function Classes() {
                   label='Ano'
                   value={newYear}
                   onChange={(e) => setNewYear(parseInt(e.target.value, 10))}
-                  required />
+                  required
+                />
               </div>
             </form>
           </DefaultModal>
@@ -235,7 +232,10 @@ export function Classes() {
             cancelLabel='Cancelar'
             confirmButtonColor='danger'
           >
-            <p>Tem certeza de que deseja excluir a turma <strong>{classOnDelete.nmclass}</strong>?</p>
+            <p>
+              Tem certeza de que deseja excluir a turma{' '}
+              <strong>{classOnDelete.nmclass}</strong>?
+            </p>
           </DefaultModal>
         </div>
       )}

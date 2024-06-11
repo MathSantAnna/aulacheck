@@ -26,19 +26,14 @@ type NewStudentProps = {
   password: string;
 };
 
-
 export async function getStudents() {
   const { data } = await api.get<StudentsProps>('/student');
-
-  console.log('data', data);
 
   return data;
 }
 
 export async function getStudent(uuid: string) {
   const { data } = await api.get<StudentProps>(`/student/${uuid}`);
-
-  console.log('data', data);
 
   return data;
 }
@@ -51,23 +46,17 @@ export async function deleteStudent(uuid: string) {
 export async function createStudent(student: NewStudentProps) {
   const { data } = await api.post('/student', { ...student });
 
-  console.log('data', data);
-
   return data;
 }
 
 export async function getStudentsByClass(classId: string) {
   const { data } = await api.get<StudentsProps[]>(`/student/class/${classId}`);
 
-  console.log('data', data);
-
   return data;
 }
 
 export async function updateStudent(uuid: string, student: NewStudentProps) {
   const { data } = await api.patch(`/student/${uuid}`, { ...student });
-
-  console.log('data', data);
 
   return data;
 }

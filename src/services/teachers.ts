@@ -20,7 +20,7 @@ type TeacherProps = {
   updated_at: string;
 };
 
-type NewTeacherProps = {
+export type NewTeacherProps = {
   nmteacher: string;
   email: string;
   admin: boolean;
@@ -30,15 +30,11 @@ type NewTeacherProps = {
 export async function getTeachers() {
   const { data } = await api.get<TeachersProps[]>('/teachers');
 
-  console.log('data', data);
-
   return data;
 }
 
 export async function getTeacher(uuidteacher: string) {
   const { data } = await api.get<TeacherProps>(`/teachers/${uuidteacher}`);
-
-  console.log('data', data);
 
   return data;
 }
@@ -48,10 +44,8 @@ export async function deleteTeacher(uuidteacher: string) {
   return data;
 }
 
-export async function createTeacher(teacher: NewTeacherProps) {
+export async function createTeacher(teacher: Partial<NewTeacherProps>) {
   const { data } = await api.post('/teachers', { ...teacher });
-
-  console.log('data', data);
 
   return data;
 }
@@ -61,8 +55,6 @@ export async function updateTeacher(
   teacher: NewTeacherProps
 ) {
   const { data } = await api.put(`/teachers/${uuidteacher}`, { ...teacher });
-
-  console.log('data', data);
 
   return data;
 }

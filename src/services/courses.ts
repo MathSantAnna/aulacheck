@@ -1,42 +1,45 @@
 import { api } from './api';
 
 type CourseProps = {
-  uuid?: string;
+  uuid: string;
   nmcourse: string;
   teacherId: string;
   classId: string;
+  nmteacher: string;
+  nmclass: string;
 };
 
-export async function getCourses(teacherId: string, isAdmin: boolean, isStudent: boolean) {
+export async function getCourses(
+  teacherId: string,
+  isAdmin: boolean,
+  isStudent: boolean
+) {
   const path = isStudent ? '/student' : '/teacher';
 
   if (isAdmin) {
     const { data } = await api.get<CourseProps[]>('/course');
 
     return data;
-  } else {   
-    const { data } = await api.get<CourseProps[]>(`/course${path}/${teacherId}`);
+  } else {
+    const { data } = await api.get<CourseProps[]>(
+      `/course${path}/${teacherId}`
+    );
 
     return data;
   }
- 
 }
 
 export async function getCourseById(courseId: string) {
   const { data } = await api.get<CourseProps>(`/course/${courseId}`);
 
   return data;
-
 }
 
-export async function createCourse(course: CourseProps) {
-
+export async function createCourse(course: Partial<CourseProps>) {
   await api.post('/course', course);
 }
 
 export async function submitAttendance(attendanceData: any) {
-
-  
   await api.post('/classroom/presence', attendanceData);
 }
 
@@ -53,23 +56,20 @@ export async function getStudentsByCourse(courseId: string) {
 }
 
 export async function getRollCallByDate(courseId: string, date: Date) {
-
   const payload = {
     courseId: courseId,
-    date: date
-  }
+    date: date,
+  };
 
   const { data } = await api.post('/checkCall', payload);
 
   return data;
 }
 
-
 export async function deleteCourse(uuid: string) {
   await api.delete(`/course/${uuid}`);
 }
 
-
 export async function updateClassRoom(uuid: string, presence: any) {
-  await api.patch(`/classroom/${uuid}`, {presence: presence});
+  await api.patch(`/classroom/${uuid}`, { presence: presence });
 }

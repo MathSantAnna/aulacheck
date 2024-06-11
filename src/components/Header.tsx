@@ -23,8 +23,6 @@ export function Header() {
 
   const nmuser = loggedUser?.nmteacher || loggedUser?.nmstudent;
 
-  console.log(loggedUser);
-
   return (
     <header className='header'>
       <img src={Logo} alt='Logo' />
